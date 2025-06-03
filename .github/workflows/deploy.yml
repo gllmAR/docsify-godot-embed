@@ -5,17 +5,13 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  # Allow manual trigger
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -32,53 +28,76 @@ jobs:
     - name: 🔄 Checkout repository
       uses: actions/checkout@v4
       with:
-        # Important: This ensures we get the full history and submodules
         fetch-depth: 0
         submodules: recursive
-        # This will pull LFS files during checkout
+        # Enable LFS for WASM files only
         lfs: true
     
-    - name: 📦 Setup Git LFS
+    - name: 📦 Setup Git LFS and fetch WASM files
       run: |
+        echo "📦 Setting up Git LFS..."
         git lfs version
+        
+        echo "🔍 Checking LFS files before pull..."
+        git lfs ls-files
+        
+        echo "📥 Pulling LFS files (especially WASM)..."
         git lfs pull
-        echo "✅ Git LFS files pulled successfully"
+        
+        echo "✅ LFS files pulled successfully"
     
     - name: 🔍 Verify Godot files
       run: |
         echo "📊 Checking Godot export files..."
         ls -lh gdEmbed/exports/web/ || echo "❌ Godot exports not found"
         
-        # Check if WASM file exists and is not an LFS pointer
+        echo "🔍 Checking critical files:"
+        
+        # Check WASM file (should be large, from LFS)
         if [ -f "gdEmbed/exports/web/index.wasm" ]; then
-          file_size=$(stat -f%z "gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -c%s "gdEmbed/exports/web/index.wasm")
+          file_size=$(stat -c%s "gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.wasm")
           echo "📁 WASM file size: $file_size bytes"
           
-          # Check if it's an LFS pointer (small text file)
           if [ "$file_size" -lt 1000 ]; then
-            echo "⚠️  WASM file appears to be an LFS pointer, checking content:"
+            echo "❌ WASM file appears to be an LFS pointer, content:"
             head -n 3 "gdEmbed/exports/web/index.wasm"
+            exit 1
           else
-            echo "✅ WASM file appears to be the actual binary ($file_size bytes)"
+            echo "✅ WASM file is the actual binary ($file_size bytes)"
           fi
         else
           echo "❌ WASM file not found"
+          exit 1
         fi
         
-        # List all files for debugging
+        # Check JavaScript file (should be directly accessible, not LFS)
+        if [ -f "gdEmbed/exports/web/index.js" ]; then
+          js_size=$(stat -c%s "gdEmbed/exports/web/index.js" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.js")
+          echo "📁 JavaScript file size: $js_size bytes"
+          
+          # Check if it contains the Engine class
+          if grep -q "Engine" "gdEmbed/exports/web/index.js"; then
+            echo "✅ JavaScript file contains Engine class"
+          else
+            echo "❌ JavaScript file missing Engine class!"
+            head -n 10 "gdEmbed/exports/web/index.js"
+            exit 1
+          fi
+        else
+          echo "❌ JavaScript file not found"
+          exit 1
+        fi
+        
         echo "📂 All export files:"
         find gdEmbed/exports/web/ -type f -exec ls -lh {} \;
     
-    - name: 🛠️ Setup Node.js (for any build tools if needed)
+    - name: 🛠️ Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: package*.json
-      # Only run if package.json exists
       if: hashFiles('package*.json') != ''
     
-    - name: 📥 Install dependencies (if package.json exists)
+    - name: 📥 Install dependencies
       run: |
         if [ -f "package.json" ]; then
           npm ci
@@ -91,16 +110,10 @@ jobs:
       run: |
         echo "🚀 Preparing files for deployment..."
         
-        # Create deployment directory
         mkdir -p dist
-        
-        # Copy all necessary files to dist
         cp -r * dist/ 2>/dev/null || true
-        
-        # Ensure .nojekyll exists to prevent Jekyll processing
         touch dist/.nojekyll
         
-        # Create _headers file for Netlify-style headers (GitHub Pages will ignore, but good practice)
         cat > dist/_headers << 'EOF'
         /*
           Cross-Origin-Embedder-Policy: require-corp
@@ -116,30 +129,25 @@ jobs:
           Content-Type: text/javascript
         EOF
         
-        # Verify critical files exist in dist
         echo "📋 Verifying deployment files..."
         ls -la dist/
         
         echo "🎮 Checking Godot files in deployment:"
         ls -lh dist/gdEmbed/exports/web/ || echo "❌ Godot exports missing in dist"
         
-        # Final verification of WASM file
         if [ -f "dist/gdEmbed/exports/web/index.wasm" ]; then
-          wasm_size=$(stat -f%z "dist/gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -c%s "dist/gdEmbed/exports/web/index.wasm")
+          wasm_size=$(stat -c%s "dist/gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/gdEmbed/exports/web/index.wasm")
           echo "✅ WASM file in dist: $wasm_size bytes"
         else
           echo "❌ WASM file missing in dist directory"
           exit 1
         fi
     
-    - name: 🔍 Debug: Show file contents (for troubleshooting)
+    - name: 🔍 Debug information
       run: |
         echo "🐛 Debug information:"
         echo "Current directory contents:"
         ls -la
-        
-        echo "Git LFS status:"
-        git lfs ls-files
         
         echo "Git status:"
         git status --porcelain

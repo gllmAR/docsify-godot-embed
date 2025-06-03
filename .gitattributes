@@ -1,18 +1,18 @@
 # Git LFS Configuration for Docsify Godot Embed Project
 
 # ===========================================
-# GODOT EXPORT FILES (Handled by CI/CD)
+# GODOT EXPORT FILES - SELECTIVE LFS TRACKING
 # ===========================================
-# Note: We'll let CI handle these files to avoid GitHub Pages LFS issues
+# Only track WASM files with LFS (they're too large for direct Git)
+# CI will fetch LFS files and serve them properly on GitHub Pages
 
-# WASM files (WebAssembly binaries) - Commit directly, not via LFS
-# *.wasm filter=lfs diff=lfs merge=lfs -text
+# WASM files (WebAssembly binaries) - Use LFS for large binaries
+*.wasm filter=lfs diff=lfs merge=lfs -text
 
-# PCK files (Godot packed data files) - Commit directly, not via LFS  
-# *.pck filter=lfs diff=lfs merge=lfs -text
-
-# Large JavaScript files from Godot exports - Commit directly, not via LFS
-# gdEmbed/exports/web/index.js filter=lfs diff=lfs merge=lfs -text
+# Other Godot files - Commit directly to Git for GitHub Pages compatibility
+# PCK files (usually <100MB) - Commit directly
+# JavaScript files - Must be directly accessible, never use LFS
+# Images - Usually small enough for direct Git
 
 # ===========================================
 # GODOT PROJECT FILES
