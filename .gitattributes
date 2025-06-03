@@ -1,0 +1,82 @@
+# Git LFS Configuration for Docsify Godot Embed Project
+
+# ===========================================
+# GODOT EXPORT FILES (Large Binary Assets)
+# ===========================================
+
+# WASM files (WebAssembly binaries) - These are typically large (10MB+)
+*.wasm filter=lfs diff=lfs merge=lfs -text
+
+# PCK files (Godot packed data files) - Can be large depending on assets
+*.pck filter=lfs diff=lfs merge=lfs -text
+
+# Large JavaScript files from Godot exports (>100KB)
+gdEmbed/exports/web/index.js filter=lfs diff=lfs merge=lfs -text
+
+# ===========================================
+# GODOT PROJECT FILES
+# ===========================================
+
+# Godot import files (can be large for textures/audio)
+*.import -text
+
+# Godot scenes and resources
+*.tscn -text
+*.tres -text
+*.godot -text
+
+# ===========================================
+# MEDIA FILES
+# ===========================================
+
+# Images (PNG files can be large)
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+
+# Audio files
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
+
+# Video files
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.avi filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+
+# SVG files (vector graphics can be large)
+*.svg filter=lfs diff=lfs merge=lfs -text
+
+# ===========================================
+# TEXT FILES (Normal Git Tracking)
+# ===========================================
+
+# Ensure text files use normal Git tracking
+*.md text=auto eol=lf
+*.txt text=auto eol=lf
+*.json text=auto eol=lf
+*.js text=auto eol=lf
+*.css text=auto eol=lf
+*.html text=auto eol=lf
+*.xml text=auto eol=lf
+*.yml text=auto eol=lf
+*.yaml text=auto eol=lf
+*.sh text=auto eol=lf
+*.gd text=auto eol=lf
+
+# Configuration files
+*.cfg text=auto eol=lf
+*.ini text=auto eol=lf
+
+# ===========================================
+# SPECIAL CASES
+# ===========================================
+
+# Exclude specific small JS files from LFS (docsify plugins)
+docsify-embed-godot.js text=auto eol=lf

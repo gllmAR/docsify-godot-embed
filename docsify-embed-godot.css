@@ -1,0 +1,248 @@
+/* Enhanced Demo Embed Styles - Optimized for Performance and Maintainability */
+
+/* ===========================================
+   DEMO CONTAINER - CONSOLIDATED
+   =========================================== */
+.demo-container {
+  /* Visual styling */
+  background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  
+  /* Layout */
+  margin: 32px auto;
+  padding: 24px;
+  max-width: 100%;
+  position: relative;
+  
+  /* Performance optimizations */
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.demo-container h3 {
+  color: #1e293b;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===========================================
+   IFRAME WRAPPER - CONSOLIDATED
+   =========================================== */
+.demo-container .iframe-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.demo-container iframe {
+  /* Layout */
+  width: 100%;
+  height: auto;
+  min-height: 400px;
+  display: block;
+  border: none;
+  
+  /* Visual */
+  background: #000;
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Performance */
+  transform: translateZ(0);
+  will-change: transform;
+  transition: transform 0.2s ease;
+}
+
+.demo-container iframe:hover {
+  transform: translateY(-2px);
+}
+
+/* ===========================================
+   BUTTON STYLING - CONSOLIDATED
+   =========================================== */
+.demo-container button {
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-shadow: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.demo-container button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.demo-container button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ===========================================
+   FULLSCREEN STYLES - CONSOLIDATED
+   =========================================== */
+.demo-container iframe:fullscreen,
+.demo-container iframe:-webkit-full-screen,
+.demo-container iframe:-moz-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+}
+
+/* ===========================================
+   DARK MODE SUPPORT
+   =========================================== */
+body.dark .demo-container {
+  background: linear-gradient(145deg, #1e293b, #334155);
+  border-color: #475569;
+}
+
+body.dark .demo-container h3 {
+  color: #f1f5f9;
+}
+
+/* ===========================================
+   DEMO PLACEHOLDER STYLING
+   =========================================== */
+.demo-placeholder {
+  background: linear-gradient(145deg, #fef3c7, #fde68a);
+  border: 2px dashed #f59e0b;
+  color: #92400e;
+}
+
+body.dark .demo-placeholder {
+  background: linear-gradient(145deg, #451a03, #78350f);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+/* ===========================================
+   TUTORIAL NAVIGATION
+   =========================================== */
+.tutorial-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 0;
+  gap: 16px;
+}
+
+.tutorial-nav a {
+  padding: 12px 24px;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.tutorial-nav a:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* ===========================================
+   LOADING STATE STYLING
+   =========================================== */
+.demo-container iframe[src=""] {
+  background: linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+    linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  animation: loading-animation 1s linear infinite;
+}
+
+@keyframes loading-animation {
+  0% {
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  100% {
+    background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   =========================================== */
+
+/* Tablet and small desktop */
+@media (max-width: 768px) {
+  .demo-container {
+    margin: 20px 10px;
+    padding: 16px;
+  }
+
+  .demo-container .iframe-wrapper {
+    max-width: 100%;
+    border-radius: 4px;
+  }
+
+  .demo-container iframe {
+    min-height: 300px;
+    aspect-ratio: 16/10;
+    width: 100% !important;
+    height: 400px !important;
+  }
+
+  .demo-container h3 {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+  }
+
+  .demo-container button {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+  }
+
+  .tutorial-nav {
+    flex-direction: column;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  .demo-container iframe {
+    min-height: 250px;
+    aspect-ratio: 3/2;
+  }
+
+  .demo-container .iframe-wrapper {
+    border-radius: 2px;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1200px) {
+  .demo-container .iframe-wrapper {
+    max-width: 1000px;
+  }
+
+  .demo-container iframe {
+    min-height: 600px;
+  }
+}
+
+/* Touch-friendly controls */
+@media (hover: none) and (pointer: coarse) {
+  .demo-container button {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+  }
+
+  .demo-container .iframe-wrapper {
+    border-width: 3px;
+  }
+}

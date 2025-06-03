@@ -1,0 +1,6 @@
+* [gdEmbed Demo project ](/gdEmbed/)
+  * [Godot Scenes](/gdEmbed/scenes/)
+    * [Animation](/gdEmbed/scenes/animation/)
+    * [Input](/gdEmbed/scenes/input/)
+    * [Movement](/gdEmbed/scenes/movement/)
+    * [Physics](/gdEmbed/scenes/physics/)
