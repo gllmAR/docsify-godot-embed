@@ -41,7 +41,7 @@ jobs:
         echo "🔍 Checking LFS files before pull..."
         git lfs ls-files
         
-        echo "📥 Pulling LFS files (especially WASM)..."
+        echo "📥 Pulling LFS files (WASM and PCK)..."
         git lfs pull
         
         echo "✅ LFS files pulled successfully"
@@ -67,6 +67,23 @@ jobs:
           fi
         else
           echo "❌ WASM file not found"
+          exit 1
+        fi
+        
+        # Check PCK file (should be large, from LFS)
+        if [ -f "gdEmbed/exports/web/index.pck" ]; then
+          pck_size=$(stat -c%s "gdEmbed/exports/web/index.pck" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.pck")
+          echo "📁 PCK file size: $pck_size bytes"
+          
+          if [ "$pck_size" -lt 1000 ]; then
+            echo "❌ PCK file appears to be an LFS pointer, content:"
+            head -n 3 "gdEmbed/exports/web/index.pck"
+            exit 1
+          else
+            echo "✅ PCK file is the actual binary ($pck_size bytes)"
+          fi
+        else
+          echo "❌ PCK file not found"
           exit 1
         fi
         
@@ -140,6 +157,14 @@ jobs:
           echo "✅ WASM file in dist: $wasm_size bytes"
         else
           echo "❌ WASM file missing in dist directory"
+          exit 1
+        fi
+        
+        if [ -f "dist/gdEmbed/exports/web/index.pck" ]; then
+          pck_size=$(stat -c%s "dist/gdEmbed/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/gdEmbed/exports/web/index.pck")
+          echo "✅ PCK file in dist: $pck_size bytes"
+        else
+          echo "❌ PCK file missing in dist directory"
           exit 1
         fi
     
