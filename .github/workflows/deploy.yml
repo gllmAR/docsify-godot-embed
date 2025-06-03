@@ -46,48 +46,143 @@ jobs:
         
         echo "✅ LFS files pulled successfully"
     
+    - name: 🎮 Setup Godot Engine
+      run: |
+        echo "🎮 Setting up Godot Engine for CI builds..."
+        
+        # Download Godot 4.4.1 for Linux
+        GODOT_VERSION="4.4.1-stable"
+        GODOT_TEMPLATE_VERSION="4.4.1.stable"
+        GODOT_URL="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+        TEMPLATES_URL="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+        
+        echo "📥 Downloading Godot ${GODOT_VERSION}..."
+        wget -q "${GODOT_URL}" -O godot.zip
+        
+        echo "📦 Extracting Godot..."
+        unzip -q godot.zip
+        
+        # Make Godot executable and move to a standard location
+        chmod +x Godot_v${GODOT_VERSION}_linux.x86_64
+        sudo mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
+        
+        echo "📥 Downloading export templates..."
+        wget -q "${TEMPLATES_URL}" -O export_templates.tpz
+        
+        echo "📦 Installing export templates..."
+        mkdir -p ~/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}
+        unzip -q export_templates.tpz -d ~/.local/share/godot/export_templates/
+        mv ~/.local/share/godot/export_templates/templates/* ~/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/
+        rmdir ~/.local/share/godot/export_templates/templates
+        
+        echo "✅ Godot setup completed"
+        godot --version
+        
+        echo "🔍 Verifying export templates..."
+        ls -la ~/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/
+    
+    - name: 🔨 Build Godot Export
+      run: |
+        echo "🔨 Building Godot project exports..."
+        cd gdEmbed
+        
+        echo "🔍 Checking Godot installation and templates..."
+        make check-godot
+        
+        echo "🔍 Checking project configuration..."
+        make check-preset
+        make status
+        
+        echo "🏗️ Building web export..."
+        make ci-build
+        
+        echo "✅ Godot export build completed"
+        
+        echo "📊 Verifying built files..."
+        ls -lh exports/web/
+        
+        # Verify the built files are properly sized
+        if [ -f "exports/web/index.wasm" ]; then
+          wasm_size=$(stat -c%s "exports/web/index.wasm")
+          echo "✅ Built WASM file: $wasm_size bytes"
+          if [ "$wasm_size" -lt 100000 ]; then
+            echo "❌ Warning: WASM file seems too small!"
+          fi
+        else
+          echo "❌ WASM file not generated!"
+          exit 1
+        fi
+        
+        if [ -f "exports/web/index.pck" ]; then
+          pck_size=$(stat -c%s "exports/web/index.pck")
+          echo "✅ Built PCK file: $pck_size bytes"
+        else
+          echo "❌ PCK file not generated!"
+          exit 1
+        fi
+        
+        if [ -f "exports/web/index.js" ]; then
+          js_size=$(stat -c%s "exports/web/index.js")
+          echo "✅ Built JS file: $js_size bytes"
+          
+          # Verify JS contains Engine class
+          if grep -q "Engine" "exports/web/index.js"; then
+            echo "✅ JavaScript contains Engine class"
+          else
+            echo "❌ JavaScript missing Engine class!"
+            exit 1
+          fi
+        else
+          echo "❌ JavaScript file not generated!"
+          exit 1
+        fi
+        
+        cd ..
+        
+        echo "🔄 Updating LFS tracked files with new builds..."
+        git add gdEmbed/exports/web/index.wasm gdEmbed/exports/web/index.pck
+        echo "✅ New builds ready for LFS tracking"
+    
     - name: 🔍 Verify Godot files
       run: |
-        echo "📊 Checking Godot export files..."
+        echo "📊 Verifying freshly built Godot export files..."
         ls -lh gdEmbed/exports/web/ || echo "❌ Godot exports not found"
         
-        echo "🔍 Checking critical files:"
+        echo "🔍 Checking critical files (post-build):"
         
-        # Check WASM file (should be large, from LFS)
+        # Check WASM file (freshly built)
         if [ -f "gdEmbed/exports/web/index.wasm" ]; then
           file_size=$(stat -c%s "gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.wasm")
           echo "📁 WASM file size: $file_size bytes"
           
-          if [ "$file_size" -lt 1000 ]; then
-            echo "❌ WASM file appears to be an LFS pointer, content:"
-            head -n 3 "gdEmbed/exports/web/index.wasm"
+          if [ "$file_size" -lt 100000 ]; then
+            echo "❌ WASM file too small, might be corrupted"
             exit 1
           else
-            echo "✅ WASM file is the actual binary ($file_size bytes)"
+            echo "✅ WASM file looks good ($file_size bytes)"
           fi
         else
           echo "❌ WASM file not found"
           exit 1
         fi
         
-        # Check PCK file (should be large, from LFS)
+        # Check PCK file (freshly built)
         if [ -f "gdEmbed/exports/web/index.pck" ]; then
           pck_size=$(stat -c%s "gdEmbed/exports/web/index.pck" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.pck")
           echo "📁 PCK file size: $pck_size bytes"
           
           if [ "$pck_size" -lt 1000 ]; then
-            echo "❌ PCK file appears to be an LFS pointer, content:"
-            head -n 3 "gdEmbed/exports/web/index.pck"
+            echo "❌ PCK file too small, might be corrupted"
             exit 1
           else
-            echo "✅ PCK file is the actual binary ($pck_size bytes)"
+            echo "✅ PCK file looks good ($pck_size bytes)"
           fi
         else
           echo "❌ PCK file not found"
           exit 1
         fi
         
-        # Check JavaScript file (should be directly accessible, not LFS)
+        # Check JavaScript file (freshly built)
         if [ -f "gdEmbed/exports/web/index.js" ]; then
           js_size=$(stat -c%s "gdEmbed/exports/web/index.js" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.js")
           echo "📁 JavaScript file size: $js_size bytes"
@@ -105,7 +200,7 @@ jobs:
           exit 1
         fi
         
-        echo "📂 All export files:"
+        echo "📂 All export files (freshly built):"
         find gdEmbed/exports/web/ -type f -exec ls -lh {} \;
     
     - name: 🛠️ Setup Node.js
