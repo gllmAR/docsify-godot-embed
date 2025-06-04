@@ -161,6 +161,16 @@
     var currentUrl = window.location.href;
     var baseUrl = currentUrl.split('#')[0];
     
+    // Fix for local development: remove index.html from base URL
+    // This prevents URLs like: http://127.0.0.1:5501/index.html/gdEmbed/exports/web/
+    // And ensures they become: http://127.0.0.1:5501/gdEmbed/exports/web/
+    baseUrl = baseUrl.replace(/\/index\.html$/, '/');
+    
+    // Ensure base URL ends with a slash
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/';
+    }
+    
     // Process each embed marker
     for (var i = 0; i < embedMarkers.snapshotLength; i++) {
       var marker = embedMarkers.snapshotItem(i);
@@ -198,6 +208,11 @@
       // Fix double slash issue in URL construction
       fullDemoUrl = fullDemoUrl.replace(/([^:]\/)\/+/g, '$1');
       
+      console.log(`🔍 URL Construction Debug:`);
+      console.log(`  Current URL: ${currentUrl}`);
+      console.log(`  Base URL: ${baseUrl}`);
+      console.log(`  Embed Path: ${embedPath}`);
+      console.log(`  Final URL: ${fullDemoUrl}`);
       console.log(`✅ Embedding: ${sceneName} -> ${fullDemoUrl}`);
       
       // Create the iframe container with enhanced resolution awareness
