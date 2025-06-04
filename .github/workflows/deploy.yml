@@ -298,7 +298,17 @@ jobs:
         echo "🚀 Preparing files for deployment..."
         
         mkdir -p dist
-        cp -r * dist/ 2>/dev/null || true
+        
+        # Copy all files and directories to dist, excluding the dist directory itself
+        for item in *; do
+          if [ "$item" != "dist" ]; then
+            cp -r "$item" dist/ 2>/dev/null || true
+          fi
+        done
+        
+        # Copy hidden files (like .gitignore, .github, etc.)
+        cp -r .[^.]* dist/ 2>/dev/null || true
+        
         touch dist/.nojekyll
         
         cat > dist/_headers << 'EOF'
