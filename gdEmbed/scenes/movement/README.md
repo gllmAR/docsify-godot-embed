@@ -1,6 +1,9 @@
-# Movement
+# Movement Techniques
 
 Learn different movement techniques in game development.
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?scene=movement -->
-<!-- end-embed-godot -->
+<!-- start-replace-subnav -->
+* [Basic Movement](/gdEmbed/scenes/movement/basic_movement/)
+* [Platformer Movement](/gdEmbed/scenes/movement/platformer_movement/)
+* [Top-Down Movement](/gdEmbed/scenes/movement/top_down_movement/)
+<!-- end-replace-subnav -->

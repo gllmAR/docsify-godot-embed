@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cm8qnlv0mgjm8"]
+[gd_scene load_steps=3 format=3 uid="uid://bxvn4l2k8hjy5"]
 
-[ext_resource type="Script" uid="uid://choms1jmdp0nu" path="res://scenes/animation/animation_player.gd" id="1_0j2q4"]
+[ext_resource type="Script" uid="uid://dgd541dih7upn" path="res://scenes/physics/basic_physics/basic_physics_player.gd" id="1_0j2q4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1hnxp"]
 size = Vector2(50, 50)
@@ -21,7 +21,7 @@ offset_left = -25.0
 offset_top = -25.0
 offset_right = 25.0
 offset_bottom = 25.0
-color = Color(0, 0.5, 1, 1)
+color = Color(1, 0.2, 0.2, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
 shape = SubResource("RectangleShape2D_1hnxp")
@@ -36,7 +36,7 @@ offset_left = 20.0
 offset_top = -120.0
 offset_right = 400.0
 offset_bottom = -20.0
-text = "Animation Demo
+text = "Physics Demo
 Move: Arrow Keys
 Reset: R
-Watch: Smooth animations and color transitions"
+Features: Momentum, friction, bouncing"
