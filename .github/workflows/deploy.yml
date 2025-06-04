@@ -24,8 +24,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: true
 
 env:
   # Default Godot projects to build if not specified in workflow_dispatch
