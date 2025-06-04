@@ -17,12 +17,18 @@
     fullscreenBtn.addEventListener('click', function() {
       // If iframe isn't loaded yet, load it first
       if (!iframe.src) {
+        // Store current scroll position
+        const currentScrollY = window.scrollY;
+        const currentScrollX = window.scrollX;
+        
         iframe.src = demoUrl;
         if (placeholderElement) {
           placeholderElement.style.display = 'none';
         }
         // Wait for load before fullscreen
         iframe.onload = () => {
+          // Restore scroll position before going fullscreen
+          window.scrollTo(currentScrollX, currentScrollY);
           setTimeout(() => toggleFullscreen(iframe, fullscreenBtn), 500);
         };
       } else {
@@ -131,25 +137,34 @@
         
         // Only update if size changed significantly (avoid micro-adjustments)
         const currentHeight = parseInt(iframe.style.height) || 0;
-        if (Math.abs(newHeight - currentHeight) > 5) {
+        if (Math.abs(newHeight - currentHeight) > 10) { // Increased threshold to prevent small changes
+          // Store scroll position before resize
+          const currentScrollY = window.scrollY;
+          const currentScrollX = window.scrollX;
+          
           iframe.style.height = newHeight + 'px';
           console.log(`Resized iframe: ${containerWidth}x${newHeight}`);
+          
+          // Restore scroll position after resize to prevent jumping
+          requestAnimationFrame(() => {
+            window.scrollTo(currentScrollX, currentScrollY);
+          });
         }
       }
     }
     
-    // Initial resize
-    setTimeout(resizeIframe, 100);
+    // Initial resize (delayed to ensure layout is stable)
+    setTimeout(resizeIframe, 200);
     
     // Throttled resize on window resize (60fps max)
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resizeIframe, 16);
+      resizeTimeout = setTimeout(resizeIframe, 100); // Increased delay for stability
     });
     
     // Resize when iframe loads (for content-based sizing)
     iframe.addEventListener('load', function() {
-      setTimeout(resizeIframe, 200);
+      setTimeout(resizeIframe, 300); // Increased delay
     });
   }
 
@@ -182,17 +197,37 @@
           
           // Load the iframe after a small delay to prevent blocking
           setTimeout(() => {
+            // Store current scroll position to prevent viewport jumping
+            const currentScrollY = window.scrollY;
+            const currentScrollX = window.scrollX;
+            
             iframe.src = demoUrl;
             
             iframe.onload = () => {
               console.log('✅ Lazy-loaded demo ready');
+              
+              // Restore scroll position to prevent viewport jumping
+              window.scrollTo(currentScrollX, currentScrollY);
+              
+              // Hide placeholder with smooth transition
               if (placeholderElement) {
-                placeholderElement.style.display = 'none';
+                placeholderElement.style.transition = 'opacity 0.3s ease';
+                placeholderElement.style.opacity = '0';
+                setTimeout(() => {
+                  placeholderElement.style.display = 'none';
+                }, 300);
               }
+              
+              // Prevent iframe from taking focus and causing scroll
+              iframe.style.pointerEvents = 'auto';
+              iframe.blur(); // Remove any focus from iframe
             };
             
             iframe.onerror = () => {
               console.error('❌ Failed to lazy-load demo:', demoUrl);
+              // Restore scroll position even on error
+              window.scrollTo(currentScrollX, currentScrollY);
+              
               if (placeholderElement) {
                 placeholderElement.innerHTML = `
                   <div style="text-align: center; color: #d73a49;">
@@ -501,6 +536,7 @@
           width="800" 
           height="600" 
           frameborder="0"
+          scrolling="no"
           allowfullscreen="true"
           webkitallowfullscreen="true"
           mozallowfullscreen="true"
@@ -513,6 +549,8 @@
             aspect-ratio: 4/3;
             display: block;
             background: #000;
+            pointer-events: none;
+            transition: all 0.3s ease;
           ">
           <p>Your browser does not support iframes. <a href="${fullDemoUrl}" target="_blank">Open demo in new tab</a></p>
         </iframe>
@@ -534,8 +572,25 @@
         var iframe = document.getElementById(iframeId);
         if (iframe && !iframe.src) {
           console.log('🖱️ User clicked to load demo:', sceneName);
+          
+          // Store current scroll position to prevent viewport jumping
+          const currentScrollY = window.scrollY;
+          const currentScrollX = window.scrollX;
+          
           iframe.src = fullDemoUrl;
-          placeholderElement.style.display = 'none';
+          
+          // Add load handler to prevent viewport changes
+          iframe.onload = () => {
+            // Restore scroll position
+            window.scrollTo(currentScrollX, currentScrollY);
+            iframe.blur(); // Remove focus to prevent scrolling
+          };
+          
+          placeholderElement.style.transition = 'opacity 0.3s ease';
+          placeholderElement.style.opacity = '0';
+          setTimeout(() => {
+            placeholderElement.style.display = 'none';
+          }, 300);
         }
       });
     }
