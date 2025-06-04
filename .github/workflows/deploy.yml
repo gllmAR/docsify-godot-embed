@@ -453,7 +453,6 @@ jobs:
           echo "📦 Godot projects deployed from LFS:"
           PROJECTS="${DEFAULT_GODOT_PROJECTS}"
         fi
-        fi
         
         IFS=',' read -ra PROJECT_ARRAY <<< "$PROJECTS"
         for project in "${PROJECT_ARRAY[@]}"; do
