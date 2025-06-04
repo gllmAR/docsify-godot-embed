@@ -118,12 +118,42 @@ body.dark .demo-container h3 {
   background: linear-gradient(145deg, #fef3c7, #fde68a);
   border: 2px dashed #f59e0b;
   color: #92400e;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.demo-placeholder:hover {
+  background: linear-gradient(145deg, #fde68a, #fcd34d);
+  border-color: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 body.dark .demo-placeholder {
   background: linear-gradient(145deg, #451a03, #78350f);
   border-color: #f59e0b;
   color: #fbbf24;
+}
+
+body.dark .demo-placeholder:hover {
+  background: linear-gradient(145deg, #78350f, #92400e);
+  border-color: #fbbf24;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.demo-loading {
+  animation: pulse 2s ease-in-out infinite;
 }
 
 /* ===========================================
