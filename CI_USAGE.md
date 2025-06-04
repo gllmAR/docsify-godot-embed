@@ -79,12 +79,14 @@ To add a new Godot project to the repository:
    make ci-build
    ```
 
-5. **Configure Git LFS** (if not already done):
+5. **Add to Git** (project files only - WASM/PCK files are built on CI):
    ```bash
-   # Add to .gitattributes (already configured for *.wasm and *.pck)
-   git add exports/web/index.wasm exports/web/index.pck
-   git commit -m "Add new Godot project exports to LFS"
+   # Only add the project source files - CI will build WASM/PCK files
+   git add yourprojectname/
+   git commit -m "Add new Godot project for CI building"
    ```
+
+   **Note**: WASM and PCK files are automatically built on the CI server and are excluded from Git tracking via `.gitignore` for faster repository operations.
 
 6. **Update default projects** (optional):
    Edit the `DEFAULT_GODOT_PROJECTS` environment variable in `.github/workflows/deploy.yml`

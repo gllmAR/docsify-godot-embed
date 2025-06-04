@@ -45,21 +45,6 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
-        # Enable LFS for WASM files only
-        lfs: true
-    
-    - name: 📦 Setup Git LFS and fetch WASM files
-      run: |
-        echo "📦 Setting up Git LFS..."
-        git lfs version
-        
-        echo "🔍 Checking LFS files before pull..."
-        git lfs ls-files
-        
-        echo "📥 Pulling LFS files (WASM and PCK)..."
-        git lfs pull
-        
-        echo "✅ LFS files pulled successfully"
     
     - name: 🎮 Setup Godot Engine
       if: ${{ github.event.inputs.build_godot != 'false' }}
@@ -200,9 +185,7 @@ jobs:
             exit 1
           fi
           
-          echo "🔄 Updating LFS tracked files with new builds..."
-          git add exports/web/index.wasm exports/web/index.pck
-          echo "✅ New builds ready for LFS tracking for $project"
+          echo "✅ New builds ready for deployment for $project"
           
           cd ..
         done
