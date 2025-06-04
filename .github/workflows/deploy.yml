@@ -292,6 +292,31 @@ jobs:
         
         echo ""
         echo "✅ All Godot projects verified successfully!"
+
+    - name: 📚 Run documentation tools
+      run: |
+        echo "📚 Running docsh documentation tools BEFORE preparing deployment..."
+        
+        # Check if docsh directory exists
+        if [ ! -d "docsh" ]; then
+          echo "❌ docsh directory not found, skipping documentation generation"
+          exit 0
+        fi
+        
+        # Check if autorun.sh exists
+        if [ ! -f "docsh/autorun.sh" ]; then
+          echo "❌ docsh/autorun.sh not found, skipping documentation generation"
+          exit 0
+        fi
+        
+        # Make autorun.sh executable
+        chmod +x docsh/autorun.sh
+        
+        # Run the documentation tools
+        echo "🔄 Executing docsh/autorun.sh..."
+        bash docsh/autorun.sh
+        
+        echo "✅ Documentation tools completed successfully!"
     
     - name: 🔧 Prepare deployment files
       run: |
@@ -379,31 +404,6 @@ jobs:
           find dist/ -name "*.wasm" -exec ls -lh {} \; || echo "📝 No WASM files found (normal if using LFS)"
           find dist/ -name "*.pck" -exec ls -lh {} \; || echo "📝 No PCK files found (normal if using LFS)"
         fi
-
-    - name: 📚 Run documentation tools
-      run: |
-        echo "📚 Running docsh documentation tools..."
-        
-        # Check if docsh directory exists
-        if [ ! -d "docsh" ]; then
-          echo "❌ docsh directory not found, skipping documentation generation"
-          exit 0
-        fi
-        
-        # Check if autorun.sh exists
-        if [ ! -f "docsh/autorun.sh" ]; then
-          echo "❌ docsh/autorun.sh not found, skipping documentation generation"
-          exit 0
-        fi
-        
-        # Make autorun.sh executable
-        chmod +x docsh/autorun.sh
-        
-        # Run the documentation tools
-        echo "🔄 Executing docsh/autorun.sh..."
-        bash docsh/autorun.sh
-        
-        echo "✅ Documentation tools completed successfully!"
 
     - name: 🔍 Debug information
       run: |
