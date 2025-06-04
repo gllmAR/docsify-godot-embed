@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       build_godot:
-        description: 'Build Godot projects (requires manual trigger)'
+        description: 'Build Godot projects (enabled by default for server builds)'
         required: false
-        default: false
+        default: true
         type: boolean
       godot_projects:
         description: 'Comma-separated list of Godot project folders to build'
@@ -62,7 +62,7 @@ jobs:
         echo "✅ LFS files pulled successfully"
     
     - name: 🎮 Setup Godot Engine
-      if: ${{ github.event.inputs.build_godot == 'true' }}
+      if: ${{ github.event.inputs.build_godot != 'false' }}
       run: |
         echo "🎮 Setting up Godot Engine for CI builds..."
         
@@ -102,7 +102,7 @@ jobs:
         echo "✅ Cleanup completed"
     
     - name: 🔨 Build Godot Export
-      if: ${{ github.event.inputs.build_godot == 'true' }}
+      if: ${{ github.event.inputs.build_godot != 'false' }}
       run: |
         echo "🔨 Building Godot project exports..."
         
@@ -224,7 +224,7 @@ jobs:
         echo "🎉 All Godot projects built successfully!"
     
     - name: 🔍 Verify Godot files
-      if: ${{ github.event.inputs.build_godot == 'true' }}
+      if: ${{ github.event.inputs.build_godot != 'false' }}
       run: |
         echo "📊 Verifying freshly built Godot export files..."
         
@@ -337,7 +337,7 @@ jobs:
         ls -la dist/
         
         # Only verify Godot files if they were built
-        if [ "${{ github.event.inputs.build_godot }}" = "true" ]; then
+        if [ "${{ github.event.inputs.build_godot }}" != "false" ]; then
           # Determine which projects were built
           if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
             GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
@@ -448,7 +448,7 @@ jobs:
         echo "  - Godot Build: ${{ github.event.inputs.build_godot || 'false' }}"
         
         # Show information based on whether Godot was built
-        if [ "${{ github.event.inputs.build_godot }}" = "true" ]; then
+        if [ "${{ github.event.inputs.build_godot }}" != "false" ]; then
           # Show which projects were built
           if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
             GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
