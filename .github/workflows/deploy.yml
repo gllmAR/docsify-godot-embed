@@ -302,21 +302,6 @@ jobs:
         echo ""
         echo "✅ All Godot projects verified successfully!"
     
-    - name: 🛠️ Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-      if: hashFiles('package*.json') != ''
-    
-    - name: 📥 Install dependencies
-      run: |
-        if [ -f "package.json" ]; then
-          npm ci
-          echo "✅ Node.js dependencies installed"
-        else
-          echo "ℹ️  No package.json found, skipping npm install"
-        fi
-    
     - name: 🔧 Prepare deployment files
       run: |
         echo "🚀 Preparing files for deployment..."
@@ -384,7 +369,32 @@ jobs:
         
         echo ""
         echo "✅ All Godot projects verified in deployment!"
-    
+
+    - name: 📚 Run documentation tools
+      run: |
+        echo "📚 Running docsh documentation tools..."
+        
+        # Check if docsh directory exists
+        if [ ! -d "docsh" ]; then
+          echo "❌ docsh directory not found, skipping documentation generation"
+          exit 0
+        fi
+        
+        # Check if autorun.sh exists
+        if [ ! -f "docsh/autorun.sh" ]; then
+          echo "❌ docsh/autorun.sh not found, skipping documentation generation"
+          exit 0
+        fi
+        
+        # Make autorun.sh executable
+        chmod +x docsh/autorun.sh
+        
+        # Run the documentation tools
+        echo "🔄 Executing docsh/autorun.sh..."
+        bash docsh/autorun.sh
+        
+        echo "✅ Documentation tools completed successfully!"
+
     - name: 🔍 Debug information
       run: |
         echo "🐛 Debug information:"
