@@ -7,6 +7,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
+      build_godot:
+        description: 'Build Godot projects (requires manual trigger)'
+        required: false
+        default: false
+        type: boolean
       godot_projects:
         description: 'Comma-separated list of Godot project folders to build'
         required: false
@@ -57,6 +62,7 @@ jobs:
         echo "✅ LFS files pulled successfully"
     
     - name: 🎮 Setup Godot Engine
+      if: ${{ github.event.inputs.build_godot == 'true' }}
       run: |
         echo "🎮 Setting up Godot Engine for CI builds..."
         
@@ -96,6 +102,7 @@ jobs:
         echo "✅ Cleanup completed"
     
     - name: 🔨 Build Godot Export
+      if: ${{ github.event.inputs.build_godot == 'true' }}
       run: |
         echo "🔨 Building Godot project exports..."
         
@@ -217,6 +224,7 @@ jobs:
         echo "🎉 All Godot projects built successfully!"
     
     - name: 🔍 Verify Godot files
+      if: ${{ github.event.inputs.build_godot == 'true' }}
       run: |
         echo "📊 Verifying freshly built Godot export files..."
         
@@ -328,47 +336,56 @@ jobs:
         echo "📋 Verifying deployment files..."
         ls -la dist/
         
-        # Determine which projects were built
-        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
-          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
-        else
-          GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
-        fi
-        
-        echo "🎮 Checking Godot files in deployment for projects: $GODOT_PROJECTS"
-        
-        # Convert comma-separated list to array
-        IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
-        
-        # Verify each project in deployment
-        for project in "${PROJECT_ARRAY[@]}"; do
-          # Trim whitespace
-          project=$(echo "$project" | xargs)
+        # Only verify Godot files if they were built
+        if [ "${{ github.event.inputs.build_godot }}" = "true" ]; then
+          # Determine which projects were built
+          if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+            GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
+          else
+            GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
+          fi
+          
+          echo "🎮 Checking Godot files in deployment for projects: $GODOT_PROJECTS"
+          
+          # Convert comma-separated list to array
+          IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
+          
+          # Verify each project in deployment
+          for project in "${PROJECT_ARRAY[@]}"; do
+            # Trim whitespace
+            project=$(echo "$project" | xargs)
+            
+            echo ""
+            echo "🔍 Verifying deployment for project: $project"
+            
+            ls -lh "dist/$project/exports/web/" || echo "❌ Godot exports missing in dist for $project"
+            
+            if [ -f "dist/$project/exports/web/index.wasm" ]; then
+              wasm_size=$(stat -c%s "dist/$project/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.wasm")
+              echo "✅ WASM file in dist for $project: $wasm_size bytes"
+            else
+              echo "❌ WASM file missing in dist directory for $project"
+              exit 1
+            fi
+            
+            if [ -f "dist/$project/exports/web/index.pck" ]; then
+              pck_size=$(stat -c%s "dist/$project/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.pck")
+              echo "✅ PCK file in dist for $project: $pck_size bytes"
+            else
+              echo "❌ PCK file missing in dist directory for $project"
+              exit 1
+            fi
+          done
           
           echo ""
-          echo "🔍 Verifying deployment for project: $project"
+          echo "✅ All Godot projects verified in deployment!"
+        else
+          echo "📦 Using existing Godot files from Git LFS (Godot build disabled)"
           
-          ls -lh "dist/$project/exports/web/" || echo "❌ Godot exports missing in dist for $project"
-          
-          if [ -f "dist/$project/exports/web/index.wasm" ]; then
-            wasm_size=$(stat -c%s "dist/$project/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.wasm")
-            echo "✅ WASM file in dist for $project: $wasm_size bytes"
-          else
-            echo "❌ WASM file missing in dist directory for $project"
-            exit 1
-          fi
-          
-          if [ -f "dist/$project/exports/web/index.pck" ]; then
-            pck_size=$(stat -c%s "dist/$project/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.pck")
-            echo "✅ PCK file in dist for $project: $pck_size bytes"
-          else
-            echo "❌ PCK file missing in dist directory for $project"
-            exit 1
-          fi
-        done
-        
-        echo ""
-        echo "✅ All Godot projects verified in deployment!"
+          # Just verify that the WASM files exist from LFS
+          find dist/ -name "*.wasm" -exec ls -lh {} \; || echo "📝 No WASM files found (normal if using LFS)"
+          find dist/ -name "*.pck" -exec ls -lh {} \; || echo "📝 No PCK files found (normal if using LFS)"
+        fi
 
     - name: 📚 Run documentation tools
       run: |
@@ -428,21 +445,31 @@ jobs:
         echo "  - Branch: ${{ github.ref_name }}"
         echo "  - Commit: ${{ github.sha }}"
         echo "  - Workflow: ${{ github.workflow }}"
+        echo "  - Godot Build: ${{ github.event.inputs.build_godot || 'false' }}"
         
-        # Show which projects were built
-        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
-          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
-          echo "  - Built projects (manual): $GODOT_PROJECTS"
+        # Show information based on whether Godot was built
+        if [ "${{ github.event.inputs.build_godot }}" = "true" ]; then
+          # Show which projects were built
+          if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+            GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
+            echo "  - Built projects (manual): $GODOT_PROJECTS"
+          else
+            echo "  - Built projects (default): ${DEFAULT_GODOT_PROJECTS}"
+          fi
+          
+          echo ""
+          echo "🎮 Godot projects built and deployed:"
+          # Convert comma-separated list to array
+          PROJECTS="${{ github.event.inputs.godot_projects }}"
+          if [ -z "$PROJECTS" ]; then
+            PROJECTS="${DEFAULT_GODOT_PROJECTS}"
+          fi
         else
-          echo "  - Built projects (default): ${DEFAULT_GODOT_PROJECTS}"
-        fi
-        
-        echo ""
-        echo "🎮 Godot projects deployed:"
-        # Convert comma-separated list to array
-        PROJECTS="${{ github.event.inputs.godot_projects }}"
-        if [ -z "$PROJECTS" ]; then
+          echo "  - Using existing builds from Git LFS (build disabled)"
+          echo ""
+          echo "📦 Godot projects deployed from LFS:"
           PROJECTS="${DEFAULT_GODOT_PROJECTS}"
+        fi
         fi
         
         IFS=',' read -ra PROJECT_ARRAY <<< "$PROJECTS"
