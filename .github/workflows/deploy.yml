@@ -80,6 +80,10 @@ jobs:
         
         echo "🔍 Verifying export templates..."
         ls -la ~/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}/
+        
+        echo "🧹 Cleaning up downloaded files..."
+        rm -f godot.zip export_templates.tpz
+        echo "✅ Cleanup completed"
     
     - name: 🔨 Build Godot Export
       run: |
@@ -142,6 +146,22 @@ jobs:
         echo "🔄 Updating LFS tracked files with new builds..."
         git add gdEmbed/exports/web/index.wasm gdEmbed/exports/web/index.pck
         echo "✅ New builds ready for LFS tracking"
+        
+        cd ..
+        
+        echo "📊 Disk usage before cleanup:"
+        du -sh ~/.local/share/godot/ 2>/dev/null || echo "No Godot directory found"
+        ls -lh /usr/local/bin/godot 2>/dev/null || echo "No Godot executable found"
+        
+        echo "🧹 Cleaning up build tools to reduce artifact size..."
+        sudo rm -f /usr/local/bin/godot
+        rm -rf ~/.local/share/godot/export_templates/
+        
+        echo "📊 Disk usage after cleanup:"
+        du -sh ~/.local/share/godot/ 2>/dev/null || echo "Godot directory cleaned"
+        ls -lh /usr/local/bin/godot 2>/dev/null || echo "Godot executable cleaned"
+        
+        echo "✅ Build tools cleanup completed"
     
     - name: 🔍 Verify Godot files
       run: |
