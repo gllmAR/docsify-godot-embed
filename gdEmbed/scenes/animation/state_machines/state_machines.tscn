@@ -101,7 +101,7 @@ offset_bottom = -10.0
 [node name="ControlsInfo" type="Label" parent="UI/StatusPanel/VBoxContainer"]
 layout_mode = 2
 text = "Arrow Keys: Move | Space: Jump
-Z: Attack | X: Defend
+1: Attack | 2: Defend
 Watch the state transitions!"
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 
@@ -129,18 +129,7 @@ offset_bottom = -10.0
 layout_mode = 2
 text = "Arrow Keys: Move
 Space: Jump
-Z: Attack (with cooldown)
-X: Defend (hold to charge)
+1: Attack (with cooldown)
+2: Defend (hold to charge)
 Watch state transitions!"
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -120.0
-offset_right = 400.0
-offset_bottom = -20.0
-text = "Animation Demo
-Move: Arrow Keys
-Reset: R
-Watch: Smooth animations and color transitions"

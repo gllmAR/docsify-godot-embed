@@ -2,8 +2,12 @@ extends Node2D
 
 @onready var ui = $UI
 @onready var state_info = $UI/StatePanel/VBoxContainer/StateInfo
+@onready var previous_state_info = $UI/StatePanel/VBoxContainer/PreviousStateInfo
 @onready var transition_info = $UI/StatePanel/VBoxContainer/TransitionInfo
 @onready var timer_info = $UI/StatePanel/VBoxContainer/TimerInfo
+@onready var cooldown_info = $UI/StatePanel/VBoxContainer/CooldownInfo
+@onready var defense_info = $UI/StatePanel/VBoxContainer/DefenseInfo
+@onready var stun_info = $UI/StatePanel/VBoxContainer/StunInfo
 @onready var controls_info = $UI/StatusPanel/VBoxContainer/ControlsInfo
 @onready var player = $Player
 
@@ -55,7 +59,7 @@ func _ready():
 	_change_state(State.IDLE)
 
 func _setup_ui():
-	controls_info.text = "WASD: Move | SPACE: Jump | Z: Attack | X: Defend"
+	controls_info.text = "Arrow Keys: Move | SPACE: Jump | 1: Attack | 2: Defend"
 
 func _setup_player():
 	player.add_to_group("player")
@@ -99,9 +103,9 @@ func _state_idle(delta):
 		_change_state(State.MOVING)
 	elif Input.is_action_just_pressed("ui_accept"):  # Space
 		_change_state(State.JUMPING)
-	elif Input.is_action_just_pressed("ui_1") and attack_cooldown <= 0:  # Z
+	elif Input.is_action_just_pressed("ui_1") and attack_cooldown <= 0:  # 1 key
 		_change_state(State.ATTACKING)
-	elif Input.is_action_pressed("ui_2"):  # X
+	elif Input.is_action_pressed("ui_2"):  # 2 key
 		_change_state(State.DEFENDING)
 
 func _state_moving(delta):
@@ -255,11 +259,17 @@ func _update_ui():
 	state_info.text = "State: " + state_names[current_state]
 	state_info.modulate = state_colors[current_state]
 	
+	# Update previous state info
+	if previous_state != current_state:
+		previous_state_info.text = "Previous: " + state_names[previous_state]
+	else:
+		previous_state_info.text = "Previous: None"
+	
 	# Update transition info
 	if previous_state != current_state:
-		transition_info.text = "Previous: " + state_names[previous_state]
+		transition_info.text = "Transition: " + state_names[previous_state] + " → " + state_names[current_state]
 	else:
-		transition_info.text = "Previous: None"
+		transition_info.text = "Transition: None"
 	
 	# Update timer info
 	if state_duration > 0:
@@ -267,6 +277,24 @@ func _update_ui():
 		timer_info.text = "Time: %.1fs remaining" % max(0, remaining)
 	else:
 		timer_info.text = "Time: %.1fs elapsed" % state_timer
+	
+	# Update cooldown info
+	if attack_cooldown > 0:
+		cooldown_info.text = "Attack Cooldown: %.1fs" % attack_cooldown
+	else:
+		cooldown_info.text = "Attack Cooldown: Ready"
+	
+	# Update defense info
+	if current_state == State.DEFENDING:
+		defense_info.text = "Defense Charge: %.1f/3.0" % defense_charge
+	else:
+		defense_info.text = "Defense Charge: 0.0"
+	
+	# Update stun info
+	if stun_duration > 0:
+		stun_info.text = "Stun Duration: %.1fs" % stun_duration
+	else:
+		stun_info.text = "Stun Duration: None"
 	
 	# Keep player in bounds
 	player.position.x = clamp(player.position.x, 50, 750)
