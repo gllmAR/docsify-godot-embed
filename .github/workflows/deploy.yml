@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      godot_projects:
+        description: 'Comma-separated list of Godot project folders to build'
+        required: false
+        default: 'gdEmbed'
+        type: string
 
 permissions:
   contents: read
@@ -15,6 +21,10 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: false
+
+env:
+  # Default Godot projects to build if not specified in workflow_dispatch
+  DEFAULT_GODOT_PROJECTS: "gdEmbed"
 
 jobs:
   build-and-deploy:
@@ -88,67 +98,109 @@ jobs:
     - name: 🔨 Build Godot Export
       run: |
         echo "🔨 Building Godot project exports..."
-        cd gdEmbed
         
-        echo "🔍 Checking Godot installation and templates..."
-        make check-godot
-        
-        echo "🔍 Checking project configuration..."
-        make check-preset
-        make status
-        
-        echo "🏗️ Building web export..."
-        make ci-build
-        
-        echo "✅ Godot export build completed"
-        
-        echo "📊 Verifying built files..."
-        ls -lh exports/web/
-        
-        # Verify the built files are properly sized
-        if [ -f "exports/web/index.wasm" ]; then
-          wasm_size=$(stat -c%s "exports/web/index.wasm")
-          echo "✅ Built WASM file: $wasm_size bytes"
-          if [ "$wasm_size" -lt 100000 ]; then
-            echo "❌ Warning: WASM file seems too small!"
-          fi
+        # Determine which projects to build
+        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
         else
-          echo "❌ WASM file not generated!"
-          exit 1
+          GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
         fi
         
-        if [ -f "exports/web/index.pck" ]; then
-          pck_size=$(stat -c%s "exports/web/index.pck")
-          echo "✅ Built PCK file: $pck_size bytes"
-        else
-          echo "❌ PCK file not generated!"
-          exit 1
-        fi
+        echo "📁 Projects to build: $GODOT_PROJECTS"
         
-        if [ -f "exports/web/index.js" ]; then
-          js_size=$(stat -c%s "exports/web/index.js")
-          echo "✅ Built JS file: $js_size bytes"
+        # Convert comma-separated list to array
+        IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
+        
+        # Build each project
+        for project in "${PROJECT_ARRAY[@]}"; do
+          # Trim whitespace
+          project=$(echo "$project" | xargs)
           
-          # Verify JS contains Engine class
-          if grep -q "Engine" "exports/web/index.js"; then
-            echo "✅ JavaScript contains Engine class"
-          else
-            echo "❌ JavaScript missing Engine class!"
+          echo ""
+          echo "🎯 Building project: $project"
+          echo "=================================="
+          
+          if [ ! -d "$project" ]; then
+            echo "❌ Project directory '$project' not found!"
+            ls -la
             exit 1
           fi
-        else
-          echo "❌ JavaScript file not generated!"
-          exit 1
-        fi
+          
+          cd "$project"
+          
+          # Check if project has a Makefile
+          if [ ! -f "Makefile" ]; then
+            echo "❌ No Makefile found in '$project' - skipping"
+            cd ..
+            continue
+          fi
+          
+          # Check if project has Godot files
+          if [ ! -f "project.godot" ]; then
+            echo "❌ No project.godot found in '$project' - skipping"
+            cd ..
+            continue
+          fi
+          
+          echo "🔍 Checking Godot installation and templates..."
+          make check-godot
+          
+          echo "🔍 Checking project configuration..."
+          make check-preset
+          make status
+          
+          echo "🏗️ Building web export..."
+          make ci-build
+          
+          echo "✅ Godot export build completed for $project"
+          
+          echo "📊 Verifying built files..."
+          ls -lh exports/web/
+          
+          # Verify the built files are properly sized
+          if [ -f "exports/web/index.wasm" ]; then
+            wasm_size=$(stat -c%s "exports/web/index.wasm")
+            echo "✅ Built WASM file: $wasm_size bytes"
+            if [ "$wasm_size" -lt 100000 ]; then
+              echo "❌ Warning: WASM file seems too small!"
+            fi
+          else
+            echo "❌ WASM file not generated!"
+            exit 1
+          fi
+          
+          if [ -f "exports/web/index.pck" ]; then
+            pck_size=$(stat -c%s "exports/web/index.pck")
+            echo "✅ Built PCK file: $pck_size bytes"
+          else
+            echo "❌ PCK file not generated!"
+            exit 1
+          fi
+          
+          if [ -f "exports/web/index.js" ]; then
+            js_size=$(stat -c%s "exports/web/index.js")
+            echo "✅ Built JS file: $js_size bytes"
+            
+            # Verify JS contains Engine class
+            if grep -q "Engine" "exports/web/index.js"; then
+              echo "✅ JavaScript contains Engine class"
+            else
+              echo "❌ JavaScript missing Engine class!"
+              exit 1
+            fi
+          else
+            echo "❌ JavaScript file not generated!"
+            exit 1
+          fi
+          
+          echo "🔄 Updating LFS tracked files with new builds..."
+          git add exports/web/index.wasm exports/web/index.pck
+          echo "✅ New builds ready for LFS tracking for $project"
+          
+          cd ..
+        done
         
-        cd ..
-        
-        echo "🔄 Updating LFS tracked files with new builds..."
-        git add gdEmbed/exports/web/index.wasm gdEmbed/exports/web/index.pck
-        echo "✅ New builds ready for LFS tracking"
-        
-        cd ..
-        
+        echo ""
         echo "📊 Disk usage before cleanup:"
         du -sh ~/.local/share/godot/ 2>/dev/null || echo "No Godot directory found"
         ls -lh /usr/local/bin/godot 2>/dev/null || echo "No Godot executable found"
@@ -162,66 +214,93 @@ jobs:
         ls -lh /usr/local/bin/godot 2>/dev/null || echo "Godot executable cleaned"
         
         echo "✅ Build tools cleanup completed"
+        echo "🎉 All Godot projects built successfully!"
     
     - name: 🔍 Verify Godot files
       run: |
         echo "📊 Verifying freshly built Godot export files..."
-        ls -lh gdEmbed/exports/web/ || echo "❌ Godot exports not found"
         
-        echo "🔍 Checking critical files (post-build):"
-        
-        # Check WASM file (freshly built)
-        if [ -f "gdEmbed/exports/web/index.wasm" ]; then
-          file_size=$(stat -c%s "gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.wasm")
-          echo "📁 WASM file size: $file_size bytes"
-          
-          if [ "$file_size" -lt 100000 ]; then
-            echo "❌ WASM file too small, might be corrupted"
-            exit 1
-          else
-            echo "✅ WASM file looks good ($file_size bytes)"
-          fi
+        # Determine which projects were built
+        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
         else
-          echo "❌ WASM file not found"
-          exit 1
+          GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
         fi
         
-        # Check PCK file (freshly built)
-        if [ -f "gdEmbed/exports/web/index.pck" ]; then
-          pck_size=$(stat -c%s "gdEmbed/exports/web/index.pck" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.pck")
-          echo "📁 PCK file size: $pck_size bytes"
-          
-          if [ "$pck_size" -lt 1000 ]; then
-            echo "❌ PCK file too small, might be corrupted"
-            exit 1
-          else
-            echo "✅ PCK file looks good ($pck_size bytes)"
-          fi
-        else
-          echo "❌ PCK file not found"
-          exit 1
-        fi
+        echo "📁 Verifying projects: $GODOT_PROJECTS"
         
-        # Check JavaScript file (freshly built)
-        if [ -f "gdEmbed/exports/web/index.js" ]; then
-          js_size=$(stat -c%s "gdEmbed/exports/web/index.js" 2>/dev/null || stat -f%z "gdEmbed/exports/web/index.js")
-          echo "📁 JavaScript file size: $js_size bytes"
+        # Convert comma-separated list to array
+        IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
+        
+        # Verify each project
+        for project in "${PROJECT_ARRAY[@]}"; do
+          # Trim whitespace
+          project=$(echo "$project" | xargs)
           
-          # Check if it contains the Engine class
-          if grep -q "Engine" "gdEmbed/exports/web/index.js"; then
-            echo "✅ JavaScript file contains Engine class"
+          echo ""
+          echo "🔍 Verifying project: $project"
+          echo "=================================="
+          
+          ls -lh "$project/exports/web/" || echo "❌ Godot exports not found for $project"
+          
+          echo "🔍 Checking critical files (post-build) for $project:"
+          
+          # Check WASM file (freshly built)
+          if [ -f "$project/exports/web/index.wasm" ]; then
+            file_size=$(stat -c%s "$project/exports/web/index.wasm" 2>/dev/null || stat -f%z "$project/exports/web/index.wasm")
+            echo "📁 WASM file size: $file_size bytes"
+            
+            if [ "$file_size" -lt 100000 ]; then
+              echo "❌ WASM file too small, might be corrupted"
+              exit 1
+            else
+              echo "✅ WASM file looks good ($file_size bytes)"
+            fi
           else
-            echo "❌ JavaScript file missing Engine class!"
-            head -n 10 "gdEmbed/exports/web/index.js"
+            echo "❌ WASM file not found for $project"
             exit 1
           fi
-        else
-          echo "❌ JavaScript file not found"
-          exit 1
-        fi
+          
+          # Check PCK file (freshly built)
+          if [ -f "$project/exports/web/index.pck" ]; then
+            pck_size=$(stat -c%s "$project/exports/web/index.pck" 2>/dev/null || stat -f%z "$project/exports/web/index.pck")
+            echo "📁 PCK file size: $pck_size bytes"
+            
+            if [ "$pck_size" -lt 1000 ]; then
+              echo "❌ PCK file too small, might be corrupted"
+              exit 1
+            else
+              echo "✅ PCK file looks good ($pck_size bytes)"
+            fi
+          else
+            echo "❌ PCK file not found for $project"
+            exit 1
+          fi
+          
+          # Check JavaScript file (freshly built)
+          if [ -f "$project/exports/web/index.js" ]; then
+            js_size=$(stat -c%s "$project/exports/web/index.js" 2>/dev/null || stat -f%z "$project/exports/web/index.js")
+            echo "📁 JavaScript file size: $js_size bytes"
+            
+            # Check if it contains the Engine class
+            if grep -q "Engine" "$project/exports/web/index.js"; then
+              echo "✅ JavaScript file contains Engine class"
+            else
+              echo "❌ JavaScript file missing Engine class!"
+              head -n 10 "$project/exports/web/index.js"
+              exit 1
+            fi
+          else
+            echo "❌ JavaScript file not found for $project"
+            exit 1
+          fi
+          
+          echo "📂 All export files for $project (freshly built):"
+          find "$project/exports/web/" -type f -exec ls -lh {} \;
+        done
         
-        echo "📂 All export files (freshly built):"
-        find gdEmbed/exports/web/ -type f -exec ls -lh {} \;
+        echo ""
+        echo "✅ All Godot projects verified successfully!"
     
     - name: 🛠️ Setup Node.js
       uses: actions/setup-node@v4
@@ -264,24 +343,47 @@ jobs:
         echo "📋 Verifying deployment files..."
         ls -la dist/
         
-        echo "🎮 Checking Godot files in deployment:"
-        ls -lh dist/gdEmbed/exports/web/ || echo "❌ Godot exports missing in dist"
-        
-        if [ -f "dist/gdEmbed/exports/web/index.wasm" ]; then
-          wasm_size=$(stat -c%s "dist/gdEmbed/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/gdEmbed/exports/web/index.wasm")
-          echo "✅ WASM file in dist: $wasm_size bytes"
+        # Determine which projects were built
+        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
         else
-          echo "❌ WASM file missing in dist directory"
-          exit 1
+          GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
         fi
         
-        if [ -f "dist/gdEmbed/exports/web/index.pck" ]; then
-          pck_size=$(stat -c%s "dist/gdEmbed/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/gdEmbed/exports/web/index.pck")
-          echo "✅ PCK file in dist: $pck_size bytes"
-        else
-          echo "❌ PCK file missing in dist directory"
-          exit 1
-        fi
+        echo "🎮 Checking Godot files in deployment for projects: $GODOT_PROJECTS"
+        
+        # Convert comma-separated list to array
+        IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
+        
+        # Verify each project in deployment
+        for project in "${PROJECT_ARRAY[@]}"; do
+          # Trim whitespace
+          project=$(echo "$project" | xargs)
+          
+          echo ""
+          echo "🔍 Verifying deployment for project: $project"
+          
+          ls -lh "dist/$project/exports/web/" || echo "❌ Godot exports missing in dist for $project"
+          
+          if [ -f "dist/$project/exports/web/index.wasm" ]; then
+            wasm_size=$(stat -c%s "dist/$project/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.wasm")
+            echo "✅ WASM file in dist for $project: $wasm_size bytes"
+          else
+            echo "❌ WASM file missing in dist directory for $project"
+            exit 1
+          fi
+          
+          if [ -f "dist/$project/exports/web/index.pck" ]; then
+            pck_size=$(stat -c%s "dist/$project/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.pck")
+            echo "✅ PCK file in dist for $project: $pck_size bytes"
+          else
+            echo "❌ PCK file missing in dist directory for $project"
+            exit 1
+          fi
+        done
+        
+        echo ""
+        echo "✅ All Godot projects verified in deployment!"
     
     - name: 🔍 Debug information
       run: |
@@ -316,3 +418,25 @@ jobs:
         echo "  - Branch: ${{ github.ref_name }}"
         echo "  - Commit: ${{ github.sha }}"
         echo "  - Workflow: ${{ github.workflow }}"
+        
+        # Show which projects were built
+        if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
+          GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
+          echo "  - Built projects (manual): $GODOT_PROJECTS"
+        else
+          echo "  - Built projects (default): ${DEFAULT_GODOT_PROJECTS}"
+        fi
+        
+        echo ""
+        echo "🎮 Godot projects deployed:"
+        # Convert comma-separated list to array
+        PROJECTS="${{ github.event.inputs.godot_projects }}"
+        if [ -z "$PROJECTS" ]; then
+          PROJECTS="${DEFAULT_GODOT_PROJECTS}"
+        fi
+        
+        IFS=',' read -ra PROJECT_ARRAY <<< "$PROJECTS"
+        for project in "${PROJECT_ARRAY[@]}"; do
+          project=$(echo "$project" | xargs)
+          echo "  - $project: ${{ steps.deployment.outputs.page_url }}$project/exports/web/"
+        done
