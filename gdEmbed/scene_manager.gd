@@ -1,101 +1,16 @@
 extends Node2D
 
-var available_categories = {
-	"animation": {
-		"title": "Animation Systems",
-		"description": "Learn animation techniques for dynamic visual feedback",
-		"icon": "🎬",
-		"scenes": {
-			"basic_animation": {
-				"path": "res://scenes/animation/basic_animation/basic_animation.tscn",
-				"title": "Basic Animation",
-				"description": "Fundamental animation concepts and keyframes"
-			},
-			"tweening": {
-				"path": "res://scenes/animation/tweening/tweening.tscn",
-				"title": "Tweening & Easing",
-				"description": "Smooth transitions and easing functions"
-			},
-			"state_machines": {
-				"path": "res://scenes/animation/state_machines/state_machines.tscn",
-				"title": "Animation State Machines",
-				"description": "Complex animation logic with state transitions"
-			}
-		}
-	},
-	"input": {
-		"title": "Input Handling",
-		"description": "Master different input methods and player controls",
-		"icon": "🎮",
-		"scenes": {
-			"keyboard_input": {
-				"path": "res://scenes/input/keyboard_input/keyboard_input.tscn",
-				"title": "Keyboard Input",
-				"description": "Handle keyboard events and key combinations"
-			},
-			"mouse_input": {
-				"path": "res://scenes/input/mouse_input/mouse_input.tscn",
-				"title": "Mouse Input",
-				"description": "Mouse clicks, movements, and interactions"
-			},
-			"gamepad_input": {
-				"path": "res://scenes/input/gamepad_input/gamepad_input.tscn",
-				"title": "Gamepad Input",
-				"description": "Controller support and gamepad handling"
-			}
-		}
-	},
-	"movement": {
-		"title": "Movement Techniques",
-		"description": "Learn different movement techniques in game development",
-		"icon": "🏃",
-		"scenes": {
-			"basic_movement": {
-				"path": "res://scenes/movement/basic_movement/basic_movement.tscn",
-				"title": "Basic Movement",
-				"description": "Simple directional movement and controls"
-			},
-			"platformer_movement": {
-				"path": "res://scenes/movement/platformer_movement/platformer_movement.tscn",
-				"title": "Platformer Movement",
-				"description": "Jump mechanics and gravity for platform games"
-			},
-			"top_down_movement": {
-				"path": "res://scenes/movement/top_down_movement/top_down_movement.tscn",
-				"title": "Top-Down Movement",
-				"description": "8-directional movement for top-down games"
-			}
-		}
-	},
-	"physics": {
-		"title": "Physics Simulation",
-		"description": "Explore physics-based interactions and simulations",
-		"icon": "⚡",
-		"scenes": {
-			"basic_physics": {
-				"path": "res://scenes/physics/basic_physics/basic_physics.tscn",
-				"title": "Basic Physics",
-				"description": "Fundamental physics concepts and forces"
-			},
-			"collision_detection": {
-				"path": "res://scenes/physics/collision_detection/collision_detection.tscn",
-				"title": "Collision Detection",
-				"description": "Detecting and responding to collisions"
-			},
-			"rigid_bodies": {
-				"path": "res://scenes/physics/rigid_bodies/rigid_bodies.tscn",
-				"title": "Rigid Bodies",
-				"description": "Realistic physics with rigid body dynamics"
-			}
-		}
-	}
-}
-
+# Scene manager now uses the autoload for data-driven discovery
 var selector_ui: Control
 var is_selector_active = false
 var current_category = ""
 
 func _ready():
+	# Wait for autoload to be ready then get categories
+	await get_tree().process_frame
+	var available_categories = SceneManagerGlobal.available_categories
+	print("🔍 Using categories from autoload: ", available_categories.keys())
+	
 	var params = _parse_url_parameters()
 	var category = params.get("category", "")
 	var scene = params.get("scene", "")
@@ -126,9 +41,6 @@ func _parse_url_parameters() -> Dictionary:
 		print("🔗 URL parameters - category: ", params.get("category", "none"), ", scene: ", params.get("scene", "none"))
 	
 	return params
-
-func _is_valid_scene(category: String, scene: String) -> bool:
-	return available_categories.has(category) and available_categories[category]["scenes"].has(scene)
 
 func _show_category_selector():
 	print("📂 Showing category selector")
@@ -201,8 +113,8 @@ func _create_category_selector_ui() -> Control:
 	scroll_container.add_child(grid)
 	
 	# Create buttons for each category
-	for category_key in available_categories.keys():
-		var category_info = available_categories[category_key]
+	for category_key in SceneManagerGlobal.available_categories.keys():
+		var category_info = SceneManagerGlobal.available_categories[category_key]
 		var button_container = VBoxContainer.new()
 		button_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		
@@ -242,7 +154,7 @@ func _create_category_selector_ui() -> Control:
 	return main_container
 
 func _create_scene_selector_ui(category: String) -> Control:
-	var category_info = available_categories[category]
+	var category_info = SceneManagerGlobal.available_categories[category]
 	var main_container = Control.new()
 	main_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	
@@ -398,7 +310,8 @@ func _on_back_to_categories():
 	_show_category_selector()
 
 func _load_scene(category: String, scene_key: String):
-	if _is_valid_scene(category, scene_key):
+	var available_categories = SceneManagerGlobal.available_categories
+	if available_categories.has(category) and available_categories[category]["scenes"].has(scene_key):
 		var scene_info = available_categories[category]["scenes"][scene_key]
 		var scene_path = scene_info.path
 		var scene = load(scene_path)
@@ -414,3 +327,7 @@ func _load_scene(category: String, scene_key: String):
 	else:
 		print("❌ Invalid scene: " + category + "/" + scene_key)
 		_show_category_selector()
+
+func _is_valid_scene(category: String, scene: String) -> bool:
+	var available_categories = SceneManagerGlobal.available_categories
+	return available_categories.has(category) and available_categories[category].scenes.has(scene)

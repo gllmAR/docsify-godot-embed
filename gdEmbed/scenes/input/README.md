@@ -1,3 +1,10 @@
+---
+title: "Input Systems"
+description: "Handle keyboard, mouse, and gamepad input"
+icon: "🎮"
+category: "input"
+---
+
 # Input Handling
 
 Master different input methods and player controls.

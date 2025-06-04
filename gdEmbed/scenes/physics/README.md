@@ -1,10 +1,13 @@
-# Physics
-
-Learn realistic physics-based movement with momentum and friction.
+---
+title: "Physics Systems"
+description: "Realistic physics simulation and collision detection"
+icon: "⚽"
+category: "physics"
+---
 
 # Physics Simulation
 
-Explore physics-based interactions and simulations.
+Explore physics-based interactions and simulations with realistic movement, momentum, and collision detection.
 
 <!-- start-replace-subnav -->
 * [Basic Physics](/gdEmbed/scenes/physics/basic_physics/)

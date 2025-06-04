@@ -1,3 +1,10 @@
+---
+title: "Animation Systems"
+description: "Dynamic visual feedback and motion design"
+icon: "🎬"
+category: "animation"
+---
+
 # Animation Systems
 
 Learn animation techniques for dynamic visual feedback.
