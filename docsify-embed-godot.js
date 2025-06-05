@@ -2,894 +2,206 @@
 (function() {
   'use strict';
   
-  // Enhanced demo controls setup
-  function setupDemoControls(iframeId, fullscreenBtnId, popoutBtnId, demoUrl, sceneName, placeholderElement) {
+  // Simple demo controls setup
+  function setupDemoControls(iframeId, fullscreenBtnId, popoutBtnId, demoUrl, sceneName) {
     var iframe = document.getElementById(iframeId);
     var fullscreenBtn = document.getElementById(fullscreenBtnId);
     var popoutBtn = document.getElementById(popoutBtnId);
     
-    if (!iframe || !fullscreenBtn || !popoutBtn) {
-      console.warn('Demo controls setup failed - elements not found');
-      return;
-    }
+    if (!iframe || !fullscreenBtn || !popoutBtn) return;
     
     // Fullscreen functionality
     fullscreenBtn.addEventListener('click', function() {
-      // If iframe isn't loaded yet, load it first
-      if (!iframe.src) {
-        // Store current scroll position
-        const currentScrollY = window.scrollY;
-        const currentScrollX = window.scrollX;
-        
-        iframe.src = demoUrl;
-        if (placeholderElement) {
-          placeholderElement.style.display = 'none';
-        }
-        // Wait for load before fullscreen
-        iframe.onload = () => {
-          // Restore scroll position before going fullscreen
-          window.scrollTo(currentScrollX, currentScrollY);
-          setTimeout(() => toggleFullscreen(iframe, fullscreenBtn), 500);
-        };
-      } else {
-        toggleFullscreen(iframe, fullscreenBtn);
-      }
+      toggleFullscreen(iframe);
     });
     
     // Pop-out functionality  
     popoutBtn.addEventListener('click', function() {
-      openPopout(demoUrl, sceneName);
+      window.open(demoUrl, `demo-${sceneName}`, 'width=1000,height=800,scrollbars=yes,resizable=yes');
     });
     
-    // Listen for fullscreen changes to update button text
+    // Listen for fullscreen changes
     document.addEventListener('fullscreenchange', function() {
       updateFullscreenButton(fullscreenBtn);
     });
     document.addEventListener('webkitfullscreenchange', function() {
       updateFullscreenButton(fullscreenBtn);
     });
-    document.addEventListener('mozfullscreenchange', function() {
-      updateFullscreenButton(fullscreenBtn);
-    });
-    
-    // Setup lazy loading for performance
-    setupLazyLoading(iframe, demoUrl, placeholderElement);
-    
-    // Responsive iframe sizing
-    setupResponsiveResize(iframe);
   }
   
   // Toggle fullscreen for iframe
-  function toggleFullscreen(iframe, button) {
-    try {
-      if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        }
-      } else {
-        // Enter fullscreen
-        if (iframe.requestFullscreen) {
-          iframe.requestFullscreen();
-        } else if (iframe.webkitRequestFullscreen) {
-          iframe.webkitRequestFullscreen();
-        } else if (iframe.mozRequestFullScreen) {
-          iframe.mozRequestFullScreen();
-        } else {
-          // Fallback: open in new window if fullscreen not supported
-          console.log('Fullscreen not supported, opening pop-out');
-          openPopout(iframe.src, 'demo');
-        }
-      }
-    } catch (error) {
-      console.warn('Fullscreen failed:', error);
-      // Fallback to pop-out
-      openPopout(iframe.src, 'demo');
+  function toggleFullscreen(iframe) {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      iframe.requestFullscreen().catch(() => {
+        // Fallback to pop-out if fullscreen fails
+        window.open(iframe.src, '_blank');
+      });
     }
   }
   
   // Update fullscreen button text
   function updateFullscreenButton(button) {
-    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
-      button.textContent = '⛶ Exit Fullscreen';
-      button.title = 'Exit fullscreen';
-    } else {
-      button.textContent = '⛶ Fullscreen';
-      button.title = 'Toggle fullscreen';
-    }
+    button.textContent = document.fullscreenElement ? '⛶ Exit Fullscreen' : '⛶ Fullscreen';
   }
   
-  // Open demo in pop-out window
-  function openPopout(url, sceneName) {
-    var popoutWindow = window.open(
-      url,
-      `demo-${sceneName}-${Date.now()}`,
-      'width=1000,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
-    );
-    
-    if (popoutWindow) {
-      popoutWindow.focus();
-      console.log('Demo opened in pop-out window');
-    } else {
-      console.warn('Pop-up blocked or failed');
-      // Fallback: open in new tab
-      window.open(url, '_blank');
-    }
-  }
-  
-  // Setup responsive iframe resizing with performance optimization
-  function setupResponsiveResize(iframe) {
-    let resizeTimeout;
-    
-    function resizeIframe() {
-      var container = iframe.closest('.iframe-wrapper');
-      if (container) {
-        var containerWidth = container.offsetWidth;
-        var aspectRatio = 4/3; // Default 4:3 ratio
-        var newHeight = containerWidth / aspectRatio;
-        
-        // Ensure minimum and maximum heights
-        newHeight = Math.max(300, Math.min(newHeight, 800));
-        
-        // Only update if size changed significantly (avoid micro-adjustments)
-        const currentHeight = parseInt(iframe.style.height) || 0;
-        if (Math.abs(newHeight - currentHeight) > 10) { // Increased threshold to prevent small changes
-          // Store scroll position before resize
-          const currentScrollY = window.scrollY;
-          const currentScrollX = window.scrollX;
-          
-          iframe.style.height = newHeight + 'px';
-          console.log(`Resized iframe: ${containerWidth}x${newHeight}`);
-          
-          // Restore scroll position after resize to prevent jumping
-          requestAnimationFrame(() => {
-            window.scrollTo(currentScrollX, currentScrollY);
-          });
-        }
-      }
-    }
-    
-    // Initial resize (delayed to ensure layout is stable)
-    setTimeout(resizeIframe, 200);
-    
-    // Throttled resize on window resize (60fps max)
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(resizeIframe, 100); // Increased delay for stability
-    });
-    
-    // Resize when iframe loads (for content-based sizing)
-    iframe.addEventListener('load', function() {
-      setTimeout(resizeIframe, 300); // Increased delay
-    });
-  }
-
-  // Intersection Observer for lazy loading
-  function setupLazyLoading(iframe, demoUrl, placeholderElement) {
-    // Only setup if Intersection Observer is supported
-    if (!('IntersectionObserver' in window)) {
-      // Fallback: load immediately
-      iframe.src = demoUrl;
-      if (placeholderElement) {
-        placeholderElement.style.display = 'none';
-      }
-      return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !iframe.src) {
-          console.log('🔍 Loading demo on viewport entry:', demoUrl);
-          
-          // Show loading state
-          if (placeholderElement) {
-            placeholderElement.innerHTML = `
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007acc; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                <p style="margin: 0; color: #666;">Loading interactive demo...</p>
-              </div>
-            `;
-          }
-          
-          // Load the iframe after a small delay to prevent blocking
-          setTimeout(() => {
-            // Store current scroll position to prevent viewport jumping
-            const currentScrollY = window.scrollY;
-            const currentScrollX = window.scrollX;
-            
-            iframe.src = demoUrl;
-            
-            iframe.onload = () => {
-              console.log('✅ Lazy-loaded demo ready');
-              
-              // Restore scroll position to prevent viewport jumping
-              window.scrollTo(currentScrollX, currentScrollY);
-              
-              // Hide placeholder with smooth transition
-              if (placeholderElement) {
-                placeholderElement.style.transition = 'opacity 0.3s ease';
-                placeholderElement.style.opacity = '0';
-                setTimeout(() => {
-                  placeholderElement.style.display = 'none';
-                }, 300);
-              }
-              
-              // Prevent iframe from taking focus and causing scroll
-              iframe.style.pointerEvents = 'auto';
-              iframe.blur(); // Remove any focus from iframe
-            };
-            
-            iframe.onerror = () => {
-              console.error('❌ Failed to lazy-load demo:', demoUrl);
-              // Restore scroll position even on error
-              window.scrollTo(currentScrollX, currentScrollY);
-              
-              if (placeholderElement) {
-                placeholderElement.innerHTML = `
-                  <div style="text-align: center; color: #d73a49;">
-                    <p>⚠️ Failed to load demo</p>
-                    <a href="${demoUrl}" target="_blank" style="color: #007acc;">Open in new tab</a>
-                  </div>
-                `;
-              }
-            };
-          }, 100);
-          
-          // Disconnect observer after loading
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      // Load when 20% of the element is visible
-      threshold: 0.2,
-      // Pre-load 100px before element comes into view
-      rootMargin: '100px 0px'
-    });
-
-    observer.observe(iframe);
-  }
-  
-  // State management to prevent infinite loops
-  const pluginState = {
-    processedMarkers: new Set(),
-    isProcessing: false,
-    lastProcessTime: 0,
-    initializationCount: 0
-  };
-
-  // Ultra-aggressive asynchronous demo initialization to prevent any blocking
-  function initializeDemoEmbedsAsync() {
-    // Prevent re-initialization if already processing or too frequent
-    const now = Date.now();
-    if (pluginState.isProcessing || (now - pluginState.lastProcessTime) < 500) {
-      console.log('🚫 Skipping initialization - already processing or too frequent');
-      return;
-    }
-    
-    pluginState.initializationCount++;
-    console.log(`🚀 Demo embed plugin initializing (ultra-async mode) - run #${pluginState.initializationCount}...`);
-    
-    // Limit initialization attempts to prevent runaway loops
-    if (pluginState.initializationCount > 10) {
-      console.warn('🛑 Too many initialization attempts, plugin disabled');
-      return;
-    }
-    
-    pluginState.isProcessing = true;
-    pluginState.lastProcessTime = now;
-    
-    // Create a completely separate execution context using web worker simulation
-    const workerCode = `
-      self.onmessage = function() {
-        self.postMessage('ready');
-      };
-    `;
-    
-    // Use multiple async strategies in parallel
-    const strategies = [
-      // Strategy 1: MessageChannel for complete context separation
-      () => {
-        const channel = new MessageChannel();
-        channel.port2.onmessage = () => {
-          try {
-            processEmbeds();
-          } finally {
-            pluginState.isProcessing = false;
-          }
-        };
-        setTimeout(() => channel.port1.postMessage('init'), 0);
-      },
-      
-      // Strategy 2: requestIdleCallback with fallback
-      () => {
-        const scheduleWork = window.requestIdleCallback || 
-          ((cb) => setTimeout(cb, 0));
-        scheduleWork(() => {
-          try {
-            processEmbeds();
-          } finally {
-            pluginState.isProcessing = false;
-          }
-        }, { timeout: 100 });
-      },
-      
-      // Strategy 3: Direct setTimeout with random delay to spread load
-      () => {
-        const randomDelay = Math.floor(Math.random() * 50) + 10;
-        setTimeout(() => {
-          try {
-            processEmbeds();
-          } finally {
-            pluginState.isProcessing = false;
-          }
-        }, randomDelay);
-      }
-    ];
-    
-    // Execute only the first available strategy to avoid duplicate work
-    strategies[0]();
-    
-    function processEmbeds() {
-      try {
-        initializeDemoEmbeds();
-        console.log('✅ Demo embeds initialized successfully (ultra-async)');
-      } catch (error) {
-        console.error('❌ Error initializing demo embeds:', error);
-        // Retry once with a different strategy
-        setTimeout(() => {
-          try {
-            initializeDemoEmbeds();
-          } catch (retryError) {
-            console.error('❌ Retry also failed:', retryError);
-          }
-        }, 1000);
-      }
-    }
-    
-    // Return resolved promise immediately to prevent any waiting
-    return Promise.resolve(null);
-  }
+  // State management
+  const processedMarkers = new Set();
 
   function initializeDemoEmbeds() {
-    // Find all embed markers in the content - now looking for embed-gdEmbed comments
+    // Find all embed markers (now supports any project name)
     var embedMarkers = document.evaluate(
-      '//comment()[contains(., "embed-gdEmbed:")]',
+      '//comment()[contains(., "embed-") and contains(., ":")]',
       document,
       null,
       XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
       null
     );
     
-    if (embedMarkers.snapshotLength === 0) {
-      console.log('No embed-gdEmbed comment markers found on this page');
-      return;
+    if (embedMarkers.snapshotLength === 0) return;
+    
+    console.log('Found', embedMarkers.snapshotLength, 'embed markers');
+    
+    // Get base URL
+    var baseUrl = window.location.href.split('#')[0].replace(/\/index\.html$/, '/');
+    if (!baseUrl.endsWith('/')) baseUrl += '/';
+    
+    // Process each marker
+    for (let i = 0; i < embedMarkers.snapshotLength; i++) {
+      processEmbed(embedMarkers.snapshotItem(i), baseUrl);
     }
-    
-    console.log('Found', embedMarkers.snapshotLength, 'embed-gdEmbed comment markers');
-    
-    // Get base URL (everything before the #)
-    var currentUrl = window.location.href;
-    var baseUrl = currentUrl.split('#')[0];
-    
-    // Fix for local development: remove index.html from base URL
-    // This prevents URLs like: http://127.0.0.1:5501/index.html/gdEmbed/exports/web/
-    // And ensures they become: http://127.0.0.1:5501/gdEmbed/exports/web/
-    baseUrl = baseUrl.replace(/\/index\.html$/, '/');
-    
-    // Ensure base URL ends with a slash
-    if (!baseUrl.endsWith('/')) {
-      baseUrl += '/';
-    }
-    
-    // Process markers in small batches to prevent blocking navigation
-    const batchSize = 1; // Process 1 embed at a time for maximum responsiveness
-    let currentBatch = 0;
-    
-    function processBatch() {
-      const startIndex = currentBatch * batchSize;
-      const endIndex = Math.min(startIndex + batchSize, embedMarkers.snapshotLength);
-      
-      for (let i = startIndex; i < endIndex; i++) {
-        processEmbed(embedMarkers.snapshotItem(i), baseUrl);
-      }
-      
-      currentBatch++;
-      
-      // Schedule next batch if there are more items
-      if (currentBatch * batchSize < embedMarkers.snapshotLength) {
-        // Use requestAnimationFrame for smooth, non-blocking processing
-        requestAnimationFrame(processBatch);
-      }
-    }
-    
-    // Start processing with a small delay to ensure DOM is ready
-    setTimeout(processBatch, 10);
   }
-  
+
   function processEmbed(marker, baseUrl) {
     var markerText = marker.textContent.trim();
+    var markerId = markerText + '_' + Date.now();
     
-    // Create unique identifier for this marker
-    const markerId = markerText + '_' + (marker.parentNode ? marker.parentNode.innerHTML.substring(0, 50) : '');
+    // Skip if already processed
+    if (processedMarkers.has(markerId)) return;
+    processedMarkers.add(markerId);
     
-    // Check if this marker has already been processed
-    if (pluginState.processedMarkers.has(markerId)) {
-      console.log('🔄 Skipping already processed marker:', markerText);
-      return;
-    }
-    
-    // Check if container already exists for this marker
+    // Check if container already exists
     const nextSibling = marker.nextSibling;
     if (nextSibling && nextSibling.classList && nextSibling.classList.contains('demo-container')) {
-      console.log('🔄 Container already exists for marker:', markerText);
-      pluginState.processedMarkers.add(markerId);
       return;
     }
     
-    console.log('Processing embed-gdEmbed marker:', markerText);
-    
-    // Mark this marker as processed
-    pluginState.processedMarkers.add(markerId);
-    
-    // Parse the marker: <!-- embed-gdEmbed: scenes/category/scene/scene_demo?param1=value1&param2=value2 -->
-    var embedMatch = markerText.match(/embed-gdEmbed:\s*(.+)/);
+    // Parse the marker: <!-- embed-gdEmbed: {$PATH}/tweening_demo --> or <!-- embed-myProject: {$PATH}/scene_name -->
+    var embedMatch = markerText.match(/embed-([^:]+):\s*(.+)/);
     if (!embedMatch) {
-      console.warn('Invalid embed-gdEmbed marker format:', markerText);
-      console.warn('Expected format: <!-- embed-gdEmbed: scenes/category/scene/scene_demo?param=value -->');
+      console.warn('Invalid embed format:', markerText);
       return;
     }
     
-    var fullEmbedPath = embedMatch[1].trim();
-    var embedPath = '';
-    var embedParams = {};
-    var sceneName = '';
+    var projectName = embedMatch[1];  // Extract project name (e.g., "gdEmbed")
+    var embedPath = embedMatch[2].trim();
     
-    // Split path and parameters
-    var questionMarkIndex = fullEmbedPath.indexOf('?');
-    if (questionMarkIndex !== -1) {
-      embedPath = fullEmbedPath.substring(0, questionMarkIndex);
-      var paramString = fullEmbedPath.substring(questionMarkIndex + 1);
+    // Handle path expansion for {$PATH} substitution
+    if (embedPath.startsWith('{$PATH}/')) {
+      // Get current document path from URL hash
+      var currentHash = window.location.hash.substring(1); // Remove #
+      var currentPath = '';
       
-      // Parse URL parameters
-      embedParams = parseUrlParameters(paramString);
-      console.log('📝 Parsed embed parameters:', embedParams);
-    } else {
-      embedPath = fullEmbedPath;
-    }
-    
-    // Extract scene information from path
-    // Expected format: scenes/category/scene_name/scene_demo
-    var pathParts = embedPath.split('/');
-    
-    if (pathParts.length >= 3) {
-      var category = pathParts[1];  // e.g., "audio"
-      var sceneFolder = pathParts[2]; // e.g., "basic_audio" 
-      var sceneName = pathParts[3] || sceneFolder; // e.g., "basic_audio_demo" or fallback to folder name
-      
-      // URL encode the category and scene for proper navigation
-      var encodedCategory = encodeURIComponent(category);
-      var encodedScene = encodeURIComponent(sceneFolder);
-      
-      // Build the demo URL using the new path format with URL encoding
-      var demoPath = `/gdEmbed/exports/web/?demo=${encodedCategory}/${encodedScene}`;
-      
-      // Add any additional parameters from the embed comment
-      if (Object.keys(embedParams).length > 0) {
-        var additionalParams = Object.keys(embedParams)
-          .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(embedParams[key])}`)
-          .join('&');
-        demoPath += '&' + additionalParams;
+      if (currentHash) {
+        // Extract directory path from current route
+        // E.g., from "#/gdEmbed/scenes/animation/tweening/README" get "scenes/animation/tweening"
+        var pathPattern = new RegExp(`${projectName}\\/(scenes\\/[^\\/]+\\/[^\\/]+)`);
+        var pathMatch = currentHash.match(pathPattern);
+        if (pathMatch) {
+          currentPath = pathMatch[1];
+        }
       }
       
-      sceneName = sceneFolder; // Use folder name for display
-    } else {
+      if (!currentPath) {
+        console.warn('Could not determine current path for {$PATH} expansion');
+        return;
+      }
+      
+      // Replace {$PATH} with the current path
+      embedPath = embedPath.replace('{$PATH}', currentPath);
+      console.log(`Path expansion: {$PATH} -> ${currentPath}, final path: ${embedPath}`);
+    }
+    
+    var pathParts = embedPath.split('/');
+    
+    if (pathParts.length < 4) {
       console.warn('Invalid embed path format:', embedPath);
-      console.warn('Expected: scenes/category/scene_name/scene_demo');
       return;
     }
     
+    // Extract path components: scenes/animation/tweening/tweening
+    var category = pathParts[1];        // animation
+    var sceneFolder = pathParts[2];     // tweening  
+    var sceneName = pathParts[3];       // tweening (actual scene name)
+    
+    // Pass the full scene path to Godot
+    var fullScenePath = `${category}/${sceneFolder}`;
+    
+    // Build demo URL using the project name and pass the full scene path
+    var demoPath = `${projectName}/exports/web/?scene=${encodeURIComponent(fullScenePath)}`;
     var fullDemoUrl = baseUrl + demoPath;
     
-    // Fix double slash issue in URL construction
-    fullDemoUrl = fullDemoUrl.replace(/([^:]\/)\/+/g, '$1');
+    console.log(`Embedding: ${sceneName} (full path: ${fullScenePath}, project: ${projectName}) -> ${fullDemoUrl}`);
     
-    console.log(`🔍 embed-gdEmbed URL Construction:`);
-    console.log(`  Full Embed Path: ${fullEmbedPath}`);
-    console.log(`  Scene Path: ${embedPath}`);
-    console.log(`  Parameters: ${JSON.stringify(embedParams)}`);
-    console.log(`  Category: ${category} (encoded: ${encodedCategory})`);
-    console.log(`  Scene: ${sceneFolder} (encoded: ${encodedScene})`);
-    console.log(`  Demo URL: ${demoPath}`);
-    console.log(`  Final URL: ${fullDemoUrl}`);
-    console.log(`✅ Embedding: ${sceneName} -> ${fullDemoUrl}`);
-    
-    // Create the iframe container with enhanced resolution awareness
+    // Create container
     var container = document.createElement('div');
     container.className = 'demo-container';
-    container.style.cssText = `
-      text-align: center; 
-      margin: 20px 0; 
-      position: relative;
-      max-width: 100%;
-    `;
     
-    // Create unique IDs for this demo
     var iframeId = `demo-iframe-${sceneName}-${Date.now()}`;
     var fullscreenBtnId = `fullscreen-btn-${sceneName}-${Date.now()}`;
     var popoutBtnId = `popout-btn-${sceneName}-${Date.now()}`;
-    var placeholderId = `placeholder-${sceneName}-${Date.now()}`;
 
     container.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap;">
-        <h3 style="margin: 0; flex: 1;">🎮 Interactive Demo: ${sceneName}${getParameterSummary(embedParams)}</h3>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="${fullscreenBtnId}" 
-                  style="padding: 8px 12px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
-                  title="Toggle fullscreen">
-            ⛶ Fullscreen
-          </button>
-          <button id="${popoutBtnId}" 
-                  style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
-                  title="Open in new window">
-            ↗ Pop Out
-          </button>
+      <div class="demo-header">
+        <h3>🎮 Interactive Demo: ${sceneName}</h3>
+        <div class="demo-controls">
+          <button id="${fullscreenBtnId}" class="btn-fullscreen">⛶ Fullscreen</button>
+          <button id="${popoutBtnId}" class="btn-popout">↗ Pop Out</button>
         </div>
       </div>
-      <div class="iframe-wrapper" style="position: relative; width: 100%; max-width: 900px; margin: 0 auto;">
-        <!-- Loading placeholder -->
-        <div id="${placeholderId}" class="demo-placeholder" style="
-          position: absolute; 
-          top: 0; 
-          left: 0; 
-          width: 100%; 
-          height: 400px; 
-          display: flex; 
-          flex-direction: column; 
-          align-items: center; 
-          justify-content: center; 
-          background: linear-gradient(145deg, #f8fafc, #e2e8f0); 
-          border: 2px dashed #cbd5e1; 
-          border-radius: 8px; 
-          color: #64748b;
-          z-index: 1;
-          cursor: pointer;
-          transition: all 0.3s ease;">
-          <div style="text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🎮</div>
-            <h4 style="margin: 0 0 8px 0; color: #1e293b;">Interactive Demo Ready</h4>
-            <p style="margin: 0; opacity: 0.8;">Click to load or scroll down to auto-load</p>
-            ${getParameterDisplay(embedParams)}
-            <small style="opacity: 0.6; margin-top: 8px; display: block;">Optimized for performance</small>
-          </div>
-        </div>
-        <!-- Iframe (loaded lazily) -->
+      <div class="iframe-wrapper">
         <iframe 
           id="${iframeId}" 
+          src="${fullDemoUrl}"
           width="800" 
           height="600" 
           frameborder="0"
-          scrolling="no"
-          allowfullscreen="true"
-          webkitallowfullscreen="true"
-          mozallowfullscreen="true"
-          style="
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            width: 100%; 
-            height: auto; 
-            min-height: 400px;
-            aspect-ratio: 4/3;
-            display: block;
-            background: #000;
-            pointer-events: none;
-            transition: all 0.3s ease;
-          ">
+          allowfullscreen="true">
           <p>Your browser does not support iframes. <a href="${fullDemoUrl}" target="_blank">Open demo in new tab</a></p>
         </iframe>
       </div>
-      <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-        Use arrow keys to move • Press R to reset • Interactive tutorial demo
-        ${getParameterInstructions(embedParams)}
-      </p>
+      <p class="demo-instructions">Use arrow keys to move • Press R to reset • Interactive demo</p>
     `;
     
-    // Insert the container after the marker
+    // Insert container after marker
     marker.parentNode.insertBefore(container, marker.nextSibling);
-
-    // Get the placeholder element for lazy loading
-    var placeholderElement = document.getElementById(placeholderId);
     
-    // Add click-to-load functionality to placeholder
-    if (placeholderElement) {
-      placeholderElement.addEventListener('click', function() {
-        var iframe = document.getElementById(iframeId);
-        if (iframe && !iframe.src) {
-          console.log('🖱️ User clicked to load demo:', sceneName);
-          
-          // Store current scroll position to prevent viewport jumping
-          const currentScrollY = window.scrollY;
-          const currentScrollX = window.scrollX;
-          
-          iframe.src = fullDemoUrl;
-          
-          // Add load handler to prevent viewport changes
-          iframe.onload = () => {
-            // Restore scroll position
-            window.scrollTo(currentScrollX, currentScrollY);
-            iframe.blur(); // Remove focus to prevent scrolling
-          };
-          
-          placeholderElement.style.transition = 'opacity 0.3s ease';
-          placeholderElement.style.opacity = '0';
-          setTimeout(() => {
-            placeholderElement.style.display = 'none';
-          }, 300);
-        }
-      });
-    }
-    
-    // Add event listeners for enhanced functionality (deferred with extra delay)
+    // Setup controls
     setTimeout(() => {
-      setupDemoControls(iframeId, fullscreenBtnId, popoutBtnId, fullDemoUrl, sceneName, placeholderElement);
-    }, 100); // Increased delay to ensure non-blocking
-    
-    console.log('  ✅ Enhanced iframe container created for:', sceneName);
+      setupDemoControls(iframeId, fullscreenBtnId, popoutBtnId, fullDemoUrl, sceneName);
+    }, 100);
   }
   
-  // Completely decouple from Docsify hooks to prevent navigation blocking
-  function initializePluginAggressively() {
-    console.log('🔄 Setting up aggressive non-blocking demo embed system...');
+  // Plugin initialization
+  function initializePlugin() {
+    // Clear processed markers on route change
+    processedMarkers.clear();
     
-    // Use MessageChannel for complete execution context separation
-    const channel = new MessageChannel();
-    channel.port2.onmessage = function() {
-      initializeDemoEmbedsAsync();
-    };
-    
-    // Monitor route changes independently using multiple strategies
-    let lastUrl = window.location.href;
-    
-    function checkForPageChanges() {
-      const currentUrl = window.location.href;
-      if (currentUrl !== lastUrl) {
-        console.log('🔄 Route change detected, scheduling demo initialization');
-        lastUrl = currentUrl;
-        
-        // Clear processed markers on route change
-        pluginState.processedMarkers.clear();
-        pluginState.initializationCount = 0; // Reset initialization counter
-        
-        // Triple-layer async separation using MessageChannel
-        setTimeout(() => {
-          channel.port1.postMessage('init');
-        }, 0);
-      }
-    }
-    
-    // Strategy 1: Monitor hash changes (primary Docsify navigation method)
-    window.addEventListener('hashchange', () => {
-      setTimeout(checkForPageChanges, 50); // Small delay to let Docsify finish rendering
-    });
-    
-    // Strategy 2: Monitor DOM changes using MutationObserver (with smart filtering)
-    const observer = new MutationObserver((mutations) => {
-      let hasRelevantContentChange = false;
-      
-      mutations.forEach(mutation => {
-        // Only trigger on content changes, not on plugin-generated changes
-        if (mutation.type === 'childList') {
-          // Check if this is a relevant target (main content areas)
-          const isRelevantTarget = mutation.target.id === 'main' || 
-                                   mutation.target.classList.contains('content') ||
-                                   mutation.target.classList.contains('markdown-section');
-          
-          if (isRelevantTarget) {
-            // Check if any added nodes are NOT our demo containers
-            const addedNodes = Array.from(mutation.addedNodes);
-            const hasNonPluginContent = addedNodes.some(node => {
-              // Skip our own containers
-              if (node.nodeType === Node.ELEMENT_NODE && 
-                  node.classList && 
-                  node.classList.contains('demo-container')) {
-                return false;
-              }
-              
-              // Skip text nodes that are just whitespace
-              if (node.nodeType === Node.TEXT_NODE && 
-                  node.textContent.trim() === '') {
-                return false;
-              }
-              
-              // This is genuine content change
-              return true;
-            });
-            
-            if (hasNonPluginContent) {
-              hasRelevantContentChange = true;
-            }
-          }
-        }
-      });
-      
-      if (hasRelevantContentChange) {
-        console.log('🔍 Relevant content change detected by MutationObserver');
-        // Clear processed markers on genuine page changes
-        pluginState.processedMarkers.clear();
-        
-        // Debounce to avoid multiple rapid triggers
-        clearTimeout(observer.debounceTimer);
-        observer.debounceTimer = setTimeout(() => {
-          channel.port1.postMessage('init');
-        }, 200); // Increased debounce time
-      }
-    });
-    
-    // Observe the main content area
-    const mainElement = document.getElementById('main') || document.body;
-    observer.observe(mainElement, {
-      childList: true,
-      subtree: true
-    });
-    
-    // Strategy 3: Periodic check as fallback (every 2 seconds, low frequency)
-    setInterval(checkForPageChanges, 2000);
-    
-    // Initial load
-    setTimeout(() => {
-      channel.port1.postMessage('init');
-    }, 500); // Give Docsify time to initialize
+    // Initialize embeds after DOM is ready
+    setTimeout(initializeDemoEmbeds, 100);
   }
   
-  // Minimal Docsify plugin registration (no blocking operations)
+  // Register Docsify plugin
   window.$docsify = window.$docsify || {};
   window.$docsify.plugins = (window.$docsify.plugins || []).concat(function(hook) {
-    // Use hook.ready() instead of hook.doneEach() to avoid per-page blocking
-    hook.ready(function() {
-      // Completely detach initialization from hook system
-      setTimeout(initializePluginAggressively, 0);
-    });
+    hook.doneEach(initializePlugin);
   });
   
-  console.log('🎮 Demo embed plugin loaded (ultra-async version)');
-  
-  // Performance monitoring for navigation debugging
-  let navigationStartTime = null;
-  
-  // Monitor navigation performance
+  // Monitor hash changes for SPA navigation
   window.addEventListener('hashchange', () => {
-    navigationStartTime = performance.now();
-    console.log('🔄 Navigation started at:', navigationStartTime);
+    setTimeout(initializePlugin, 200);
   });
   
-  // Monitor when page content is ready
-  const originalSetTimeout = window.setTimeout;
-  let embedInitStartTime = null;
-  
-  // Override setTimeout to track our async operations
-  window.setTimeout = function(callback, delay, ...args) {
-    if (callback.toString().includes('initializeDemoEmbeds')) {
-      embedInitStartTime = performance.now();
-      console.log('⏱️ Embed initialization scheduled at:', embedInitStartTime);
-      
-      const wrappedCallback = function() {
-        const embedInitEndTime = performance.now();
-        console.log('⏱️ Embed initialization completed at:', embedInitEndTime);
-        if (navigationStartTime) {
-          console.log(`📊 Navigation to embed completion: ${embedInitEndTime - navigationStartTime}ms`);
-        }
-        return callback.apply(this, arguments);
-      };
-      
-      return originalSetTimeout.call(this, wrappedCallback, delay, ...args);
-    }
-    return originalSetTimeout.call(this, callback, delay, ...args);
-  };
-  
-  // Helper function to parse URL parameters from embed comment
-  function parseUrlParameters(paramString) {
-    var params = {};
-    
-    if (!paramString || paramString.trim() === '') {
-      return params;
-    }
-    
-    var pairs = paramString.split('&');
-    
-    for (var i = 0; i < pairs.length; i++) {
-      var pair = pairs[i].split('=');
-      if (pair.length === 2) {
-        var key = decodeURIComponent(pair[0].trim());
-        var value = decodeURIComponent(pair[1].trim());
-        
-        // Convert common boolean strings
-        if (value.toLowerCase() === 'true') {
-          value = true;
-        } else if (value.toLowerCase() === 'false') {
-          value = false;
-        } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
-          // Convert numeric strings to numbers
-          value = parseFloat(value);
-        }
-        
-        params[key] = value;
-      }
-    }
-    
-    return params;
-  }
-
-  // Helper function to generate parameter summary for title
-  function getParameterSummary(params) {
-    if (Object.keys(params).length === 0) {
-      return '';
-    }
-    
-    var summary = [];
-    var maxParams = 2; // Only show first 2 parameters in title
-    var count = 0;
-    
-    for (var key in params) {
-      if (count >= maxParams) break;
-      
-      var value = params[key];
-      if (typeof value === 'boolean') {
-        summary.push(value ? key : `no-${key}`);
-      } else {
-        summary.push(`${key}=${value}`);
-      }
-      count++;
-    }
-    
-    var totalParams = Object.keys(params).length;
-    if (totalParams > maxParams) {
-      summary.push(`+${totalParams - maxParams} more`);
-    }
-    
-    return summary.length > 0 ? ` (${summary.join(', ')})` : '';
-  }
-
-  // Helper function to generate parameter display for placeholder
-  function getParameterDisplay(params) {
-    if (Object.keys(params).length === 0) {
-      return '';
-    }
-    
-    var paramList = [];
-    for (var key in params) {
-      var value = params[key];
-      var displayValue = typeof value === 'string' ? `"${value}"` : value;
-      paramList.push(`${key}: ${displayValue}`);
-    }
-    
-    return `<small style="opacity: 0.7; margin-top: 4px; display: block;">Parameters: ${paramList.join(', ')}</small>`;
-  }
-
-  // Helper function to generate parameter instructions
-  function getParameterInstructions(params) {
-    if (Object.keys(params).length === 0) {
-      return '';
-    }
-    
-    var instructions = [];
-    
-    // Add specific instructions based on parameters
-    if (params.hasOwnProperty('volume')) {
-      instructions.push(`Volume: ${params.volume}`);
-    }
-    if (params.hasOwnProperty('autoplay') && params.autoplay) {
-      instructions.push('Autoplay enabled');
-    }
-    if (params.hasOwnProperty('loop') && params.loop) {
-      instructions.push('Looping enabled');
-    }
-    if (params.hasOwnProperty('speed')) {
-      instructions.push(`Speed: ${params.speed}x`);
-    }
-    
-    return instructions.length > 0 ? ` • ${instructions.join(' • ')}` : '';
-  }
+  console.log('🎮 Demo embed plugin loaded');
 })();

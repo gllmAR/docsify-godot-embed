@@ -2,7 +2,7 @@
 
 Learn smooth transitions and easing functions for polished animations.
 
-<!-- embed-gdEmbed: scenes/animation/tweening/tweening -->
+<!-- embed-gdEmbed: {$PATH}/tweening -->
 
 
 ## What You'll Learn
