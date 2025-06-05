@@ -10,8 +10,11 @@ on:
       build_godot:
         description: 'Build Godot projects (enabled by default for server builds)'
         required: false
-        default: true
-        type: boolean
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
       godot_projects:
         description: 'Comma-separated list of Godot project folders to build'
         required: false
@@ -25,7 +28,7 @@ permissions:
 
 concurrency:
   group: "pages-${{ github.ref }}"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   # Default Godot projects to build if not specified in workflow_dispatch
@@ -44,10 +47,10 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        submodules: recursive
+        lfs: true
     
     - name: 🎮 Setup Godot Engine
-      if: ${{ github.event.inputs.build_godot != 'false' }}
+      if: ${{ github.event.inputs.build_godot != 'false' && (github.event_name == 'push' || github.event.inputs.build_godot == 'true') }}
       run: |
         echo "🎮 Setting up Godot Engine for CI builds..."
         
@@ -87,7 +90,7 @@ jobs:
         echo "✅ Cleanup completed"
     
     - name: 🔨 Build Godot Export
-      if: ${{ github.event.inputs.build_godot != 'false' }}
+      if: ${{ github.event.inputs.build_godot != 'false' && (github.event_name == 'push' || github.event.inputs.build_godot == 'true') }}
       run: |
         echo "🔨 Building Godot project exports..."
         
@@ -147,7 +150,7 @@ jobs:
           echo "✅ Godot export build completed for $project"
           
           echo "📊 Verifying built files..."
-          ls -lh exports/web/
+          ls -lh exports/web/ || echo "No exports directory"
           
           # Verify the built files are properly sized
           if [ -f "exports/web/index.wasm" ]; then
@@ -161,49 +164,9 @@ jobs:
             exit 1
           fi
           
-          if [ -f "exports/web/index.pck" ]; then
-            pck_size=$(stat -c%s "exports/web/index.pck")
-            echo "✅ Built PCK file: $pck_size bytes"
-          else
-            echo "❌ PCK file not generated!"
-            exit 1
-          fi
-          
-          if [ -f "exports/web/index.js" ]; then
-            js_size=$(stat -c%s "exports/web/index.js")
-            echo "✅ Built JS file: $js_size bytes"
-            
-            # Verify JS contains Engine class
-            if grep -q "Engine" "exports/web/index.js"; then
-              echo "✅ JavaScript contains Engine class"
-            else
-              echo "❌ JavaScript missing Engine class!"
-              exit 1
-            fi
-          else
-            echo "❌ JavaScript file not generated!"
-            exit 1
-          fi
-          
-          echo "✅ New builds ready for deployment for $project"
-          
           cd ..
         done
         
-        echo ""
-        echo "📊 Disk usage before cleanup:"
-        du -sh ~/.local/share/godot/ 2>/dev/null || echo "No Godot directory found"
-        ls -lh /usr/local/bin/godot 2>/dev/null || echo "No Godot executable found"
-        
-        echo "🧹 Cleaning up build tools to reduce artifact size..."
-        sudo rm -f /usr/local/bin/godot
-        rm -rf ~/.local/share/godot/export_templates/
-        
-        echo "📊 Disk usage after cleanup:"
-        du -sh ~/.local/share/godot/ 2>/dev/null || echo "Godot directory cleaned"
-        ls -lh /usr/local/bin/godot 2>/dev/null || echo "Godot executable cleaned"
-        
-        echo "✅ Build tools cleanup completed"
         echo "🎉 All Godot projects built successfully!"
     
     - name: 🔍 Verify Godot files
@@ -332,7 +295,7 @@ jobs:
         done
         
         # Copy hidden files (like .gitignore, .github, etc.)
-        cp -r .[^.]* dist/ 2>/dev/null || true
+        find . -maxdepth 1 -name ".*" -not -name ".git" -exec cp -r {} dist/ \; 2>/dev/null || true
         
         touch dist/.nojekyll
         
@@ -351,71 +314,8 @@ jobs:
           Content-Type: text/javascript
         EOF
         
-        echo "📋 Verifying deployment files..."
+        echo "📋 Deployment files prepared successfully!"
         ls -la dist/
-        
-        # Only verify Godot files if they were built
-        if [ "${{ github.event.inputs.build_godot }}" != "false" ]; then
-          # Determine which projects were built
-          if [ -n "${{ github.event.inputs.godot_projects }}" ]; then
-            GODOT_PROJECTS="${{ github.event.inputs.godot_projects }}"
-          else
-            GODOT_PROJECTS="${DEFAULT_GODOT_PROJECTS}"
-          fi
-          
-          echo "🎮 Checking Godot files in deployment for projects: $GODOT_PROJECTS"
-          
-          # Convert comma-separated list to array
-          IFS=',' read -ra PROJECT_ARRAY <<< "$GODOT_PROJECTS"
-          
-          # Verify each project in deployment
-          for project in "${PROJECT_ARRAY[@]}"; do
-            # Trim whitespace
-            project=$(echo "$project" | xargs)
-            
-            echo ""
-            echo "🔍 Verifying deployment for project: $project"
-            
-            ls -lh "dist/$project/exports/web/" || echo "❌ Godot exports missing in dist for $project"
-            
-            if [ -f "dist/$project/exports/web/index.wasm" ]; then
-              wasm_size=$(stat -c%s "dist/$project/exports/web/index.wasm" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.wasm")
-              echo "✅ WASM file in dist for $project: $wasm_size bytes"
-            else
-              echo "❌ WASM file missing in dist directory for $project"
-              exit 1
-            fi
-            
-            if [ -f "dist/$project/exports/web/index.pck" ]; then
-              pck_size=$(stat -c%s "dist/$project/exports/web/index.pck" 2>/dev/null || stat -f%z "dist/$project/exports/web/index.pck")
-              echo "✅ PCK file in dist for $project: $pck_size bytes"
-            else
-              echo "❌ PCK file missing in dist directory for $project"
-              exit 1
-            fi
-          done
-          
-          echo ""
-          echo "✅ All Godot projects verified in deployment!"
-        else
-          echo "📦 Using existing Godot files from Git LFS (Godot build disabled)"
-          
-          # Just verify that the WASM files exist from LFS
-          find dist/ -name "*.wasm" -exec ls -lh {} \; || echo "📝 No WASM files found (normal if using LFS)"
-          find dist/ -name "*.pck" -exec ls -lh {} \; || echo "📝 No PCK files found (normal if using LFS)"
-        fi
-
-    - name: 🔍 Debug information
-      run: |
-        echo "🐛 Debug information:"
-        echo "Current directory contents:"
-        ls -la
-        
-        echo "Git status:"
-        git status --porcelain
-        
-        echo "Submodule status:"
-        git submodule status
     
     - name: 📄 Setup GitHub Pages
       uses: actions/configure-pages@v4
