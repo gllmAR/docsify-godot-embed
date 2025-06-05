@@ -48,6 +48,32 @@ jobs:
       with:
         fetch-depth: 0
         lfs: true
+        submodules: true
+    
+    - name: 🔧 Initialize submodules
+      run: |
+        echo "🔧 Initializing and updating submodules..."
+        git submodule init
+        git submodule update --recursive --remote
+        
+        echo "📋 Submodule status:"
+        git submodule status
+        
+        echo "🔍 Checking docsh directory:"
+        if [ -d "docsh" ]; then
+          echo "✅ docsh directory found"
+          ls -la docsh/
+          if [ -f "docsh/autorun.sh" ]; then
+            echo "✅ docsh/autorun.sh found"
+            chmod +x docsh/autorun.sh
+          else
+            echo "❌ docsh/autorun.sh not found"
+          fi
+        else
+          echo "❌ docsh directory not found"
+          echo "Available directories:"
+          ls -la
+        fi
     
     - name: 🎮 Setup Godot Engine
       if: ${{ github.event.inputs.build_godot != 'false' && (github.event_name == 'push' || github.event.inputs.build_godot == 'true') }}
@@ -262,22 +288,30 @@ jobs:
         
         # Check if docsh directory exists
         if [ ! -d "docsh" ]; then
-          echo "❌ docsh directory not found, skipping documentation generation"
+          echo "❌ docsh directory not found after submodule initialization"
+          echo "🔍 Available directories:"
+          ls -la
+          echo "🔍 Git submodule status:"
+          git submodule status
+          echo "⚠️ Continuing without documentation generation..."
           exit 0
         fi
         
         # Check if autorun.sh exists
         if [ ! -f "docsh/autorun.sh" ]; then
-          echo "❌ docsh/autorun.sh not found, skipping documentation generation"
+          echo "❌ docsh/autorun.sh not found"
+          echo "🔍 Contents of docsh directory:"
+          ls -la docsh/
+          echo "⚠️ Continuing without documentation generation..."
           exit 0
         fi
         
-        # Make autorun.sh executable
+        # Make autorun.sh executable and run it
         chmod +x docsh/autorun.sh
         
         # Run the documentation tools
         echo "🔄 Executing docsh/autorun.sh..."
-        bash docsh/autorun.sh
+        cd docsh && ./autorun.sh
         
         echo "✅ Documentation tools completed successfully!"
     
