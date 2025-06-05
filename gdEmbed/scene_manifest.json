@@ -1,0 +1,326 @@
+{
+	"generated_at": "2025-06-05T14:28:34",
+	"scenes": {
+		"animation_basic_animation_basic_animation": {
+			"category": "animation",
+			"directory": "animation/basic_animation",
+			"name": "basic_animation",
+			"path": "res://scenes/animation/basic_animation/basic_animation.tscn",
+			"relative_path": "animation/basic_animation/basic_animation.tscn",
+			"subfolder": "basic_animation",
+			"title": "Basic Animation"
+		},
+		"animation_state_machines_state_machines": {
+			"category": "animation",
+			"directory": "animation/state_machines",
+			"name": "state_machines",
+			"path": "res://scenes/animation/state_machines/state_machines.tscn",
+			"relative_path": "animation/state_machines/state_machines.tscn",
+			"subfolder": "state_machines",
+			"title": "State Machines"
+		},
+		"animation_tweening_tweening": {
+			"category": "animation",
+			"directory": "animation/tweening",
+			"name": "tweening",
+			"path": "res://scenes/animation/tweening/tweening.tscn",
+			"relative_path": "animation/tweening/tweening.tscn",
+			"subfolder": "tweening",
+			"title": "Tweening"
+		},
+		"audio_advance_audioplayer_advance_audioplayer": {
+			"category": "audio",
+			"directory": "audio/advance_audioplayer",
+			"name": "advance_audioplayer",
+			"path": "res://scenes/audio/advance_audioplayer/advance_audioplayer.tscn",
+			"relative_path": "audio/advance_audioplayer/advance_audioplayer.tscn",
+			"subfolder": "advance_audioplayer",
+			"title": "Advance Audioplayer"
+		},
+		"audio_basic_audio_basic_audio_demo": {
+			"category": "audio",
+			"directory": "audio/basic_audio",
+			"name": "basic_audio_demo",
+			"path": "res://scenes/audio/basic_audio/basic_audio_demo.tscn",
+			"relative_path": "audio/basic_audio/basic_audio_demo.tscn",
+			"subfolder": "basic_audio",
+			"title": "Basic Audio Demo"
+		},
+		"input_gamepad_input_gamepad_input": {
+			"category": "input",
+			"directory": "input/gamepad_input",
+			"name": "gamepad_input",
+			"path": "res://scenes/input/gamepad_input/gamepad_input.tscn",
+			"relative_path": "input/gamepad_input/gamepad_input.tscn",
+			"subfolder": "gamepad_input",
+			"title": "Gamepad Input"
+		},
+		"input_input_player": {
+			"category": "input",
+			"directory": "input",
+			"name": "input_player",
+			"path": "res://scenes/input/input_player.tscn",
+			"relative_path": "input/input_player.tscn",
+			"subfolder": "",
+			"title": "Input Player"
+		},
+		"input_keyboard_input_keyboard_input": {
+			"category": "input",
+			"directory": "input/keyboard_input",
+			"name": "keyboard_input",
+			"path": "res://scenes/input/keyboard_input/keyboard_input.tscn",
+			"relative_path": "input/keyboard_input/keyboard_input.tscn",
+			"subfolder": "keyboard_input",
+			"title": "Keyboard Input"
+		},
+		"input_mouse_input_mouse_input": {
+			"category": "input",
+			"directory": "input/mouse_input",
+			"name": "mouse_input",
+			"path": "res://scenes/input/mouse_input/mouse_input.tscn",
+			"relative_path": "input/mouse_input/mouse_input.tscn",
+			"subfolder": "mouse_input",
+			"title": "Mouse Input"
+		},
+		"movement_basic_movement_basic_movement": {
+			"category": "movement",
+			"directory": "movement/basic_movement",
+			"name": "basic_movement",
+			"path": "res://scenes/movement/basic_movement/basic_movement.tscn",
+			"relative_path": "movement/basic_movement/basic_movement.tscn",
+			"subfolder": "basic_movement",
+			"title": "Basic Movement"
+		},
+		"movement_platformer_movement_platformer_movement": {
+			"category": "movement",
+			"directory": "movement/platformer_movement",
+			"name": "platformer_movement",
+			"path": "res://scenes/movement/platformer_movement/platformer_movement.tscn",
+			"relative_path": "movement/platformer_movement/platformer_movement.tscn",
+			"subfolder": "platformer_movement",
+			"title": "Platformer Movement"
+		},
+		"movement_top_down_movement_top_down_movement": {
+			"category": "movement",
+			"directory": "movement/top_down_movement",
+			"name": "top_down_movement",
+			"path": "res://scenes/movement/top_down_movement/top_down_movement.tscn",
+			"relative_path": "movement/top_down_movement/top_down_movement.tscn",
+			"subfolder": "top_down_movement",
+			"title": "Top Down Movement"
+		},
+		"physics_basic_physics_basic_physics": {
+			"category": "physics",
+			"directory": "physics/basic_physics",
+			"name": "basic_physics",
+			"path": "res://scenes/physics/basic_physics/basic_physics.tscn",
+			"relative_path": "physics/basic_physics/basic_physics.tscn",
+			"subfolder": "basic_physics",
+			"title": "Basic Physics"
+		},
+		"physics_collision_detection_collision_detection": {
+			"category": "physics",
+			"directory": "physics/collision_detection",
+			"name": "collision_detection",
+			"path": "res://scenes/physics/collision_detection/collision_detection.tscn",
+			"relative_path": "physics/collision_detection/collision_detection.tscn",
+			"subfolder": "collision_detection",
+			"title": "Collision Detection"
+		},
+		"physics_rigid_bodies_rigid_bodies": {
+			"category": "physics",
+			"directory": "physics/rigid_bodies",
+			"name": "rigid_bodies",
+			"path": "res://scenes/physics/rigid_bodies/rigid_bodies.tscn",
+			"relative_path": "physics/rigid_bodies/rigid_bodies.tscn",
+			"subfolder": "rigid_bodies",
+			"title": "Rigid Bodies"
+		},
+		"visual_effects_particle_systems_particle_systems_demo": {
+			"category": "visual_effects",
+			"directory": "visual_effects/particle_systems",
+			"name": "particle_systems_demo",
+			"path": "res://scenes/visual_effects/particle_systems/particle_systems_demo.tscn",
+			"relative_path": "visual_effects/particle_systems/particle_systems_demo.tscn",
+			"subfolder": "particle_systems",
+			"title": "Particle Systems Demo"
+		},
+		"visual_effects_shader_effects_shader_effects_demo": {
+			"category": "visual_effects",
+			"directory": "visual_effects/shader_effects",
+			"name": "shader_effects_demo",
+			"path": "res://scenes/visual_effects/shader_effects/shader_effects_demo.tscn",
+			"relative_path": "visual_effects/shader_effects/shader_effects_demo.tscn",
+			"subfolder": "shader_effects",
+			"title": "Shader Effects Demo"
+		}
+	},
+	"structure": {
+		"animation": {
+			"children": [],
+			"path": "animation",
+			"scenes": [],
+			"type": "folder"
+		},
+		"animation/basic_animation": {
+			"children": [],
+			"path": "animation/basic_animation",
+			"scenes": [
+				"animation_basic_animation_basic_animation"
+			],
+			"type": "folder"
+		},
+		"animation/state_machines": {
+			"children": [],
+			"path": "animation/state_machines",
+			"scenes": [
+				"animation_state_machines_state_machines"
+			],
+			"type": "folder"
+		},
+		"animation/tweening": {
+			"children": [],
+			"path": "animation/tweening",
+			"scenes": [
+				"animation_tweening_tweening"
+			],
+			"type": "folder"
+		},
+		"audio": {
+			"children": [],
+			"path": "audio",
+			"scenes": [],
+			"type": "folder"
+		},
+		"audio/advance_audioplayer": {
+			"children": [],
+			"path": "audio/advance_audioplayer",
+			"scenes": [
+				"audio_advance_audioplayer_advance_audioplayer"
+			],
+			"type": "folder"
+		},
+		"audio/basic_audio": {
+			"children": [],
+			"path": "audio/basic_audio",
+			"scenes": [
+				"audio_basic_audio_basic_audio_demo"
+			],
+			"type": "folder"
+		},
+		"input": {
+			"children": [],
+			"path": "input",
+			"scenes": [
+				"input_input_player"
+			],
+			"type": "folder"
+		},
+		"input/gamepad_input": {
+			"children": [],
+			"path": "input/gamepad_input",
+			"scenes": [
+				"input_gamepad_input_gamepad_input"
+			],
+			"type": "folder"
+		},
+		"input/keyboard_input": {
+			"children": [],
+			"path": "input/keyboard_input",
+			"scenes": [
+				"input_keyboard_input_keyboard_input"
+			],
+			"type": "folder"
+		},
+		"input/mouse_input": {
+			"children": [],
+			"path": "input/mouse_input",
+			"scenes": [
+				"input_mouse_input_mouse_input"
+			],
+			"type": "folder"
+		},
+		"movement": {
+			"children": [],
+			"path": "movement",
+			"scenes": [],
+			"type": "folder"
+		},
+		"movement/basic_movement": {
+			"children": [],
+			"path": "movement/basic_movement",
+			"scenes": [
+				"movement_basic_movement_basic_movement"
+			],
+			"type": "folder"
+		},
+		"movement/platformer_movement": {
+			"children": [],
+			"path": "movement/platformer_movement",
+			"scenes": [
+				"movement_platformer_movement_platformer_movement"
+			],
+			"type": "folder"
+		},
+		"movement/top_down_movement": {
+			"children": [],
+			"path": "movement/top_down_movement",
+			"scenes": [
+				"movement_top_down_movement_top_down_movement"
+			],
+			"type": "folder"
+		},
+		"physics": {
+			"children": [],
+			"path": "physics",
+			"scenes": [],
+			"type": "folder"
+		},
+		"physics/basic_physics": {
+			"children": [],
+			"path": "physics/basic_physics",
+			"scenes": [
+				"physics_basic_physics_basic_physics"
+			],
+			"type": "folder"
+		},
+		"physics/collision_detection": {
+			"children": [],
+			"path": "physics/collision_detection",
+			"scenes": [
+				"physics_collision_detection_collision_detection"
+			],
+			"type": "folder"
+		},
+		"physics/rigid_bodies": {
+			"children": [],
+			"path": "physics/rigid_bodies",
+			"scenes": [
+				"physics_rigid_bodies_rigid_bodies"
+			],
+			"type": "folder"
+		},
+		"visual_effects": {
+			"children": [],
+			"path": "visual_effects",
+			"scenes": [],
+			"type": "folder"
+		},
+		"visual_effects/particle_systems": {
+			"children": [],
+			"path": "visual_effects/particle_systems",
+			"scenes": [
+				"visual_effects_particle_systems_particle_systems_demo"
+			],
+			"type": "folder"
+		},
+		"visual_effects/shader_effects": {
+			"children": [],
+			"path": "visual_effects/shader_effects",
+			"scenes": [
+				"visual_effects_shader_effects_shader_effects_demo"
+			],
+			"type": "folder"
+		}
+	}
+}

@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bhlxm5p1qy6vr"]
+[gd_scene load_steps=2 format=3 uid="uid://bfgkn7nxjbxfh"]
 
-[ext_resource type="Script" uid="uid://bxiovr3pwt0mu" path="res://scene_manager.gd" id="1_v8kc1"]
+[ext_resource type="Script" uid="uid://ddh825ese1h15" path="res://addons/dynamic_scene_browser/scene_manager.gd" id="1_h8k9x"]
 
-[node name="SceneManager" type="Node2D"]
-script = ExtResource("1_v8kc1")
+[node name="Main" type="Node2D"]
+script = ExtResource("1_h8k9x")
