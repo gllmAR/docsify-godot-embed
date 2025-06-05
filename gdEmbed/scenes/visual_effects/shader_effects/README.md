@@ -2,6 +2,8 @@
 
 Master GPU-powered visual effects with interactive shader programming demonstrations.
 
+<!-- embed-gdEmbed: {$PATH}/shader_effects_demo -->
+
 ## Overview
 
 This demo showcases the power of custom shaders in Godot, featuring:
@@ -13,7 +15,6 @@ This demo showcases the power of custom shaders in Godot, featuring:
 
 ## Interactive Demo
 
-<!-- embed-gdEmbed: scenes/visual_effects/shader_effects/shader_effects_demo -->
 
 ### Learning Objectives
 

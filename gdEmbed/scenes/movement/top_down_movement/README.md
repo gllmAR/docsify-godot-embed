@@ -1,6 +1,7 @@
 # Top-Down Movement
 
-<!-- embed-gdEmbed: scenes/movement/top_down_movement/top_down_movement-->
+<!-- embed-gdEmbed: {$PATH}/top_down_movement -->
+
 
 Learn 8-directional movement mechanics for top-down games.
 

@@ -2,7 +2,7 @@
 
 Learn fundamental physics concepts and force-based interactions.
 
-<!-- embed-gdEmbed: scenes/physics/basic_physics/basic_physics-->
+<!-- embed-gdEmbed: {$PATH}/basic_physics -->
 
 ## What You'll Learn
 

@@ -1,6 +1,6 @@
 # Platformer Movement
 
-<!-- embed-gdEmbed: scenes/movement/platformer_movement/platformer_movement-->
+<!-- embed-gdEmbed: {$PATH}/platformer_movement -->
 
 Master jump mechanics and gravity for engaging platform games.
 

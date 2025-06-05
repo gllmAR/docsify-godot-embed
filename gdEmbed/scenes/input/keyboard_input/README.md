@@ -2,6 +2,8 @@
 
 Handle keyboard events and key combinations for responsive controls.
 
+<!-- embed-gdEmbed: {$PATH}/keyboard_input -->
+
 ## What You'll Learn
 
 - Input mapping and action setup
@@ -17,7 +19,6 @@ This demo shows keyboard input techniques including:
 - Key combination detection
 - Input responsiveness
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=input&scene=keyboard_input -->
 
 ## Key Concepts
 

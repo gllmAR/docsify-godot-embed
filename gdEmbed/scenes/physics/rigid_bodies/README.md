@@ -2,7 +2,7 @@
 
 Implement realistic physics with rigid body dynamics and interactions.
 
-<!-- embed-gdEmbed: scenes/physics/rigid_bodies/rigid_bodies_demo-->
+<!-- embed-gdEmbed: {$PATH}/rigid_bodies -->
 
 ## What You'll Learn
 

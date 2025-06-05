@@ -2,6 +2,8 @@
 
 Add controller support and gamepad handling for console-style gameplay.
 
+<!-- embed-gdEmbed: {$PATH}/gamepad_input -->
+
 ## What You'll Learn
 
 - Gamepad detection and connection handling

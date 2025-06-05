@@ -2,6 +2,8 @@
 
 Master mouse clicks, movements, and interactions for intuitive controls.
 
+<!-- embed-gdEmbed: {$PATH}/mouse_input -->
+
 ## What You'll Learn
 
 - Mouse button detection
@@ -17,7 +19,6 @@ This demo shows mouse input techniques including:
 - Drag and drop mechanics
 - Mouse wheel handling
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=input&scene=mouse_input -->
 
 ## Key Concepts
 

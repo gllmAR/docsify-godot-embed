@@ -1,6 +1,6 @@
 # Basic Movement
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=movement&scene=basic_movement -->
+<!-- embed-gdEmbed: {$PATH}/basic_movement -->
 
 Learn simple directional movement and fundamental player controls.
 

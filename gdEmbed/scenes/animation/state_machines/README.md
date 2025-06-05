@@ -2,7 +2,7 @@
 
 Master complex animation logic with state transitions and conditional playback.
 
-<!-- embed-gdEmbed: scenes/animation/state_machines/state_machines_demo -->
+<!-- embed-gdEmbed: {$PATH}/state_machines_demo -->
 
 ## What You'll Learn
 

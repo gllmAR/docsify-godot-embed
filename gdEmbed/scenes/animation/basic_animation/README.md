@@ -2,7 +2,7 @@
 
 Learn fundamental animation concepts and keyframes in Godot.
 
-<!-- embed-gdEmbed:  scenes/animation/basic_animation/basic_animation_demo -->
+<!-- embed-gdEmbed:  {$PATH}/basic_animation_demo -->
 
 ## What You'll Learn
 

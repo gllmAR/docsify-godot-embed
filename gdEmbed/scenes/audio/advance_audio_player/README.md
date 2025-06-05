@@ -2,6 +2,8 @@
 
 An enhanced version of the professional audio player with additional features for advanced audio manipulation and analysis.
 
+<!-- embed-gdEmbed: {$PATH}/advance_audio_demo -->
+
 ## Overview
 
 This demo demonstrates:
@@ -14,7 +16,7 @@ This demo demonstrates:
 
 ## Interactive Demo
 
-<!-- embed-gdEmbed: scenes/audio/advance_audio_player/advance_audio_demo -->
+
 
 ## Key Features
 

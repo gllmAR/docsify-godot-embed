@@ -2,7 +2,7 @@
 
 Master GPU-accelerated particle effects including fire, smoke, explosions, and magical effects in this interactive demonstration.
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=visual_effects&scene=particle_systems -->
+<!-- embed-gdEmbed: {$PATH}/particle_systems_demos -->
 
 ## What You'll Learn
 

@@ -2,7 +2,7 @@
 
 Master detecting and responding to object collisions and interactions.
 
-<!-- embed-gdEmbed: scenes/physics/collision_detection/collision_detection -->
+<!-- embed-gdEmbed: {$PATH}/collision_detection -->
 
 ## What You'll Learn
 
