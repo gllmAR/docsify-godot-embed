@@ -2,6 +2,8 @@
 
 Implement realistic physics with rigid body dynamics and interactions.
 
+<!-- embed-gdEmbed: scenes/physics/rigid_bodies/rigid_bodies_demo-->
+
 ## What You'll Learn
 
 - RigidBody2D setup and configuration
@@ -36,8 +38,6 @@ This comprehensive demo demonstrates rigid body physics including:
 - Learn force application techniques
 - Experience real-time physics parameter tuning
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=physics&scene=rigid_bodies -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

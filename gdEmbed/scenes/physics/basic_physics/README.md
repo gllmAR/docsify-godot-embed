@@ -2,6 +2,8 @@
 
 Learn fundamental physics concepts and force-based interactions.
 
+<!-- embed-gdEmbed: scenes/physics/basic_physics/basic_physics-->
+
 ## What You'll Learn
 
 - Physics bodies and forces
@@ -17,8 +19,6 @@ This demo shows basic physics including:
 - Friction and momentum
 - Physics-based interactions
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=physics&scene=basic_physics -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

@@ -1,5 +1,7 @@
 # Top-Down Movement
 
+<!-- embed-gdEmbed: scenes/movement/top_down_movement/top_down_movement-->
+
 Learn 8-directional movement mechanics for top-down games.
 
 ## Features
@@ -53,8 +55,6 @@ This demo shows top-down movement including:
 - Character facing direction
 - Smooth movement transitions
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=movement&scene=top_down_movement -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

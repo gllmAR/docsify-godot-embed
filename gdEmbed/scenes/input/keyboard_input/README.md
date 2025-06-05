@@ -18,7 +18,6 @@ This demo shows keyboard input techniques including:
 - Input responsiveness
 
 <!-- start-embed-demo-/gdEmbed/exports/web/?category=input&scene=keyboard_input -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

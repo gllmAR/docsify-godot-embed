@@ -18,7 +18,6 @@ This demo shows mouse input techniques including:
 - Mouse wheel handling
 
 <!-- start-embed-demo-/gdEmbed/exports/web/?category=input&scene=mouse_input -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

@@ -50,7 +50,6 @@ This comprehensive gamepad demo demonstrates:
 **Note**: This demo requires a connected gamepad to fully experience all features.
 
 <!-- start-embed-demo-/gdEmbed/exports/web/?category=input&scene=gamepad_input -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

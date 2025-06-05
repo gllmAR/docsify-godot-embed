@@ -2,6 +2,9 @@
 
 Learn smooth transitions and easing functions for polished animations.
 
+<!-- embed-gdEmbed: scenes/animation/tweening/tweening -->
+
+
 ## What You'll Learn
 
 - Advanced Tween system with real-time controls
@@ -50,8 +53,6 @@ This comprehensive tweening demo demonstrates:
 - Master parallel animation techniques
 - Experience real-time parameter adjustment
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=animation&scene=tweening -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

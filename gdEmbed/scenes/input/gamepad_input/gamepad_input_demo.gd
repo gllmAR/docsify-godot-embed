@@ -2,12 +2,15 @@ extends Node2D
 
 @onready var ui = $UI
 @onready var gamepad_status = $UI/GamepadPanel/VBoxContainer/GamepadStatus
-@onready var analog_info = $UI/GamepadPanel/VBoxContainer/AnalogInfo
+@onready var analog_info = $UI/GamepadPanel/VBoxContainer/AnalogStatus
+@onready var right_analog_info = $UI/GamepadPanel/VBoxContainer/RightAnalogStatus
+@onready var trigger_info = $UI/GamepadPanel/VBoxContainer/TriggerStatus
 @onready var button_status = $UI/GamepadPanel/VBoxContainer/ButtonStatus
-@onready var deadzone_info = $UI/StatusPanel/VBoxContainer/DeadzoneInfo
-@onready var vibration_info = $UI/StatusPanel/VBoxContainer/VibrationInfo
+@onready var deadzone_info = $UI/GamepadPanel/VBoxContainer/DeadzoneInfo
+@onready var vibration_info = $UI/GamepadPanel/VBoxContainer/VibrationInfo
 @onready var deadzone_slider = $UI/ControlPanel/VBoxContainer/DeadzoneContainer/DeadzoneSlider
 @onready var deadzone_label = $UI/ControlPanel/VBoxContainer/DeadzoneContainer/DeadzoneLabel
+@onready var web_gamepad_info = $UI/WebGamepadInfo
 @onready var player = $Player
 
 var connected_gamepads = {}
@@ -40,6 +43,9 @@ func _ready():
 	_setup_ui()
 	_setup_player()
 	_check_connected_gamepads()
+	
+	# Connect gamepad signals
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 
 func _setup_ui():
 	deadzone_slider.value = deadzone
@@ -47,19 +53,30 @@ func _setup_ui():
 	_update_deadzone_label()
 	
 	gamepad_status.text = "🎮 No gamepad connected"
-	analog_info.text = "Left: (0.0, 0.0) | Right: (0.0, 0.0)"
+	analog_info.text = "Left: (0.0, 0.0)"
+	right_analog_info.text = "Right: (0.0, 0.0)"
+	trigger_info.text = "Triggers: L:0.0 R:0.0"
 	button_status.text = "Buttons: None pressed"
 	deadzone_info.text = "Deadzone: Movement below threshold ignored"
 	vibration_info.text = "Vibration: Press A/Cross to test"
+	
+	if OS.has_feature("web"):
+		web_gamepad_info.visible = true
+		web_gamepad_info.text = "🌐 Web: Press any gamepad button to detect"
 
 func _setup_player():
 	player.add_to_group("player")
 
 func _check_connected_gamepads():
-	# Check for already connected gamepads
-	for device_id in range(4):  # Check first 4 controller slots
-		if Input.get_connected_joypads().has(device_id):
-			_on_gamepad_connected(device_id)
+	var connected = Input.get_connected_joypads()
+	if connected.size() > 0:
+		_on_gamepad_connected(connected[0])
+
+func _on_joy_connection_changed(device_id: int, connected: bool):
+	if connected:
+		_on_gamepad_connected(device_id)
+	else:
+		_on_gamepad_disconnected(device_id)
 
 func _process(delta):
 	if active_gamepad >= 0:
@@ -115,10 +132,9 @@ func _update_analog_input():
 	trigger_values.right = Input.get_joy_axis(active_gamepad, JOY_AXIS_TRIGGER_RIGHT)
 	
 	# Update UI
-	analog_info.text = "Left: (%.2f, %.2f) | Right: (%.2f, %.2f)" % [
-		analog_positions.left.x, analog_positions.left.y,
-		analog_positions.right.x, analog_positions.right.y
-	]
+	analog_info.text = "Left: (%.2f, %.2f)" % [analog_positions.left.x, analog_positions.left.y]
+	right_analog_info.text = "Right: (%.2f, %.2f)" % [analog_positions.right.x, analog_positions.right.y]
+	trigger_info.text = "Triggers: L:%.2f R:%.2f" % [abs(trigger_values.left), abs(trigger_values.right)]
 
 func _update_button_input():
 	pressed_buttons.clear()
@@ -190,10 +206,13 @@ func _on_gamepad_connected(device_id: int):
 	active_gamepad = device_id
 	connected_gamepads[device_id] = true
 	
-	# Get gamepad name if possible
 	var gamepad_name = Input.get_joy_name(device_id)
 	gamepad_status.text = "🎮 Gamepad %d: %s" % [device_id, gamepad_name]
 	gamepad_status.modulate = Color.GREEN
+	
+	if OS.has_feature("web"):
+		web_gamepad_info.text = "🎮 Gamepad %d detected!" % device_id
+		web_gamepad_info.modulate = Color.GREEN
 	
 	print("Gamepad connected: %s (ID: %d)" % [gamepad_name, device_id])
 
@@ -207,8 +226,14 @@ func _on_gamepad_disconnected(device_id: int):
 		gamepad_status.modulate = Color.WHITE
 		
 		# Reset displays
-		analog_info.text = "Left: (0.0, 0.0) | Right: (0.0, 0.0)"
+		analog_info.text = "Left: (0.0, 0.0)"
+		right_analog_info.text = "Right: (0.0, 0.0)"
+		trigger_info.text = "Triggers: L:0.0 R:0.0"
 		button_status.text = "Buttons: None pressed"
+		
+		if OS.has_feature("web"):
+			web_gamepad_info.text = "🌐 Web: Press any gamepad button to detect"
+			web_gamepad_info.modulate = Color.YELLOW
 	
 	print("Gamepad disconnected: ID %d" % device_id)
 

@@ -7,7 +7,7 @@ extends Node2D
 @onready var velocity_label = $UI/StatusPanel/VBoxContainer/VelocityLabel
 @onready var position_label = $UI/StatusPanel/VBoxContainer/PositionLabel
 @onready var input_label = $UI/StatusPanel/VBoxContainer/InputLabel
-@onready var trail = $Player/Trail2D
+@onready var trail = $Trail2D
 
 var movement_speed = 200.0
 var velocity = Vector2.ZERO
@@ -30,12 +30,14 @@ func _setup_player():
 	if trail:
 		trail.width = 3.0
 		trail.default_color = Color.CYAN
-		trail.length = 50
+		# Initialize trail with player's starting position
+		trail.add_point(player.position)
 
 func _process(delta):
 	_handle_input()
 	_update_movement(delta)
 	_update_ui()
+	_update_trail()
 
 func _handle_input():
 	# Get raw input
@@ -87,3 +89,24 @@ func _on_speed_changed(value):
 
 func _update_speed_label():
 	speed_label.text = "Speed: %d px/s" % movement_speed
+
+func _update_trail():
+	# Update trail with player position (center of the player)
+	if trail:
+		trail.add_point(player.position)
+		
+		# Keep trail length manageable (show last 50 positions)
+		if trail.get_point_count() > 50:
+			trail.remove_point(0)
+		
+		# Fade the trail over time by adjusting alpha
+		var point_count = trail.get_point_count()
+		if point_count > 1:
+			# Make older points more transparent
+			for i in range(point_count):
+				var alpha = float(i) / float(point_count - 1)
+				# We can't modify individual point colors in Line2D easily,
+				# so we'll just use the default_color with some transparency
+				var color = trail.default_color
+				color.a = 1.0 - alpha # Invert alpha for fading effect
+				trail.set_point_color(i, color)

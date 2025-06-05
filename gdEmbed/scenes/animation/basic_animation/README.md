@@ -2,6 +2,8 @@
 
 Learn fundamental animation concepts and keyframes in Godot.
 
+<!-- embed-gdEmbed:  scenes/animation/basic_animation/basic_animation_demo -->
+
 ## What You'll Learn
 
 - Animation keyframes and timeline
@@ -17,8 +19,6 @@ This demo shows basic animation techniques including:
 - Color transitions
 - Basic animation timing
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=animation&scene=basic_animation -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

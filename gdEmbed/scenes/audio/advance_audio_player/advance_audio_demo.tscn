@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d22u70mlwokm7" path="res://scenes/audio/advance_audio_player/advance_audio_demo.gd" id="1_h5n8m"]
 
-[node name="Advance_audio_demo" type="Control"]
+[node name="AdvanceAudioDemo" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

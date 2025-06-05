@@ -355,9 +355,9 @@
   }
 
   function initializeDemoEmbeds() {
-    // Find all embed markers in the content
+    // Find all embed markers in the content - now looking for embed-gdEmbed comments
     var embedMarkers = document.evaluate(
-      '//comment()[contains(., "start-embed-")]',
+      '//comment()[contains(., "embed-gdEmbed:")]',
       document,
       null,
       XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
@@ -365,11 +365,11 @@
     );
     
     if (embedMarkers.snapshotLength === 0) {
-      console.log('No embed markers found on this page');
+      console.log('No embed-gdEmbed comment markers found on this page');
       return;
     }
     
-    console.log('Found', embedMarkers.snapshotLength, 'embed markers');
+    console.log('Found', embedMarkers.snapshotLength, 'embed-gdEmbed comment markers');
     
     // Get base URL (everything before the #)
     var currentUrl = window.location.href;
@@ -430,45 +430,80 @@
       return;
     }
     
-    console.log('Processing marker:', markerText);
+    console.log('Processing embed-gdEmbed marker:', markerText);
     
     // Mark this marker as processed
     pluginState.processedMarkers.add(markerId);
     
-    // Parse the marker: <!-- start-embed-TYPE-/path/to/export?params -->
-    var embedMatch = markerText.match(/start-embed-([a-zA-Z0-9-]+)-(.+)/);
+    // Parse the marker: <!-- embed-gdEmbed: scenes/category/scene/scene_demo?param1=value1&param2=value2 -->
+    var embedMatch = markerText.match(/embed-gdEmbed:\s*(.+)/);
     if (!embedMatch) {
-      console.warn('Invalid embed marker format:', markerText);
+      console.warn('Invalid embed-gdEmbed marker format:', markerText);
+      console.warn('Expected format: <!-- embed-gdEmbed: scenes/category/scene/scene_demo?param=value -->');
       return;
     }
     
-    var embedType = embedMatch[1];
-    var embedPath = embedMatch[2];
+    var fullEmbedPath = embedMatch[1].trim();
+    var embedPath = '';
+    var embedParams = {};
     var sceneName = '';
     
-    // Fix for remote deployment: remove index.html from path to use directory URL
-    // This fixes the issue where ?scene= parameters don't work with explicit index.html
-    embedPath = embedPath.replace(/\/index\.html(\?|$)/, '/$1');
-    
-    // Extract scene name from path (look for ?scene=NAME)
-    var sceneMatch = embedPath.match(/[?&]scene=([^&]+)/);
-    if (sceneMatch) {
-      sceneName = sceneMatch[1];
+    // Split path and parameters
+    var questionMarkIndex = fullEmbedPath.indexOf('?');
+    if (questionMarkIndex !== -1) {
+      embedPath = fullEmbedPath.substring(0, questionMarkIndex);
+      var paramString = fullEmbedPath.substring(questionMarkIndex + 1);
+      
+      // Parse URL parameters
+      embedParams = parseUrlParameters(paramString);
+      console.log('📝 Parsed embed parameters:', embedParams);
     } else {
-      // Fallback: extract from path
-      var pathParts = embedPath.split('/');
-      sceneName = pathParts[pathParts.length - 1].replace('.html', '');
+      embedPath = fullEmbedPath;
     }
     
-    var fullDemoUrl = baseUrl + embedPath;
+    // Extract scene information from path
+    // Expected format: scenes/category/scene_name/scene_demo
+    var pathParts = embedPath.split('/');
+    
+    if (pathParts.length >= 3) {
+      var category = pathParts[1];  // e.g., "audio"
+      var sceneFolder = pathParts[2]; // e.g., "basic_audio" 
+      var sceneName = pathParts[3] || sceneFolder; // e.g., "basic_audio_demo" or fallback to folder name
+      
+      // URL encode the category and scene for proper navigation
+      var encodedCategory = encodeURIComponent(category);
+      var encodedScene = encodeURIComponent(sceneFolder);
+      
+      // Build the demo URL using the new path format with URL encoding
+      var demoPath = `/gdEmbed/exports/web/?demo=${encodedCategory}/${encodedScene}`;
+      
+      // Add any additional parameters from the embed comment
+      if (Object.keys(embedParams).length > 0) {
+        var additionalParams = Object.keys(embedParams)
+          .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(embedParams[key])}`)
+          .join('&');
+        demoPath += '&' + additionalParams;
+      }
+      
+      sceneName = sceneFolder; // Use folder name for display
+    } else {
+      console.warn('Invalid embed path format:', embedPath);
+      console.warn('Expected: scenes/category/scene_name/scene_demo');
+      return;
+    }
+    
+    var fullDemoUrl = baseUrl + demoPath;
     
     // Fix double slash issue in URL construction
     fullDemoUrl = fullDemoUrl.replace(/([^:]\/)\/+/g, '$1');
     
-    console.log(`🔍 URL Construction Debug:`);
-    console.log(`  Current URL: ${window.location.href}`);
-    console.log(`  Base URL: ${baseUrl}`);
-    console.log(`  Embed Path: ${embedPath}`);
+    console.log(`🔍 embed-gdEmbed URL Construction:`);
+    console.log(`  Full Embed Path: ${fullEmbedPath}`);
+    console.log(`  Scene Path: ${embedPath}`);
+    console.log(`  Parameters: ${JSON.stringify(embedParams)}`);
+    console.log(`  Category: ${category} (encoded: ${encodedCategory})`);
+    console.log(`  Scene: ${sceneFolder} (encoded: ${encodedScene})`);
+    console.log(`  Demo URL: ${demoPath}`);
     console.log(`  Final URL: ${fullDemoUrl}`);
     console.log(`✅ Embedding: ${sceneName} -> ${fullDemoUrl}`);
     
@@ -490,7 +525,7 @@
 
     container.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap;">
-        <h3 style="margin: 0; flex: 1;">🎮 Interactive Demo: ${sceneName}</h3>
+        <h3 style="margin: 0; flex: 1;">🎮 Interactive Demo: ${sceneName}${getParameterSummary(embedParams)}</h3>
         <div style="display: flex; gap: 10px; align-items: center;">
           <button id="${fullscreenBtnId}" 
                   style="padding: 8px 12px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
@@ -527,6 +562,7 @@
             <div style="font-size: 48px; margin-bottom: 16px;">🎮</div>
             <h4 style="margin: 0 0 8px 0; color: #1e293b;">Interactive Demo Ready</h4>
             <p style="margin: 0; opacity: 0.8;">Click to load or scroll down to auto-load</p>
+            ${getParameterDisplay(embedParams)}
             <small style="opacity: 0.6; margin-top: 8px; display: block;">Optimized for performance</small>
           </div>
         </div>
@@ -557,6 +593,7 @@
       </div>
       <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
         Use arrow keys to move • Press R to reset • Interactive tutorial demo
+        ${getParameterInstructions(embedParams)}
       </p>
     `;
     
@@ -751,4 +788,108 @@
     }
     return originalSetTimeout.call(this, callback, delay, ...args);
   };
+  
+  // Helper function to parse URL parameters from embed comment
+  function parseUrlParameters(paramString) {
+    var params = {};
+    
+    if (!paramString || paramString.trim() === '') {
+      return params;
+    }
+    
+    var pairs = paramString.split('&');
+    
+    for (var i = 0; i < pairs.length; i++) {
+      var pair = pairs[i].split('=');
+      if (pair.length === 2) {
+        var key = decodeURIComponent(pair[0].trim());
+        var value = decodeURIComponent(pair[1].trim());
+        
+        // Convert common boolean strings
+        if (value.toLowerCase() === 'true') {
+          value = true;
+        } else if (value.toLowerCase() === 'false') {
+          value = false;
+        } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+          // Convert numeric strings to numbers
+          value = parseFloat(value);
+        }
+        
+        params[key] = value;
+      }
+    }
+    
+    return params;
+  }
+
+  // Helper function to generate parameter summary for title
+  function getParameterSummary(params) {
+    if (Object.keys(params).length === 0) {
+      return '';
+    }
+    
+    var summary = [];
+    var maxParams = 2; // Only show first 2 parameters in title
+    var count = 0;
+    
+    for (var key in params) {
+      if (count >= maxParams) break;
+      
+      var value = params[key];
+      if (typeof value === 'boolean') {
+        summary.push(value ? key : `no-${key}`);
+      } else {
+        summary.push(`${key}=${value}`);
+      }
+      count++;
+    }
+    
+    var totalParams = Object.keys(params).length;
+    if (totalParams > maxParams) {
+      summary.push(`+${totalParams - maxParams} more`);
+    }
+    
+    return summary.length > 0 ? ` (${summary.join(', ')})` : '';
+  }
+
+  // Helper function to generate parameter display for placeholder
+  function getParameterDisplay(params) {
+    if (Object.keys(params).length === 0) {
+      return '';
+    }
+    
+    var paramList = [];
+    for (var key in params) {
+      var value = params[key];
+      var displayValue = typeof value === 'string' ? `"${value}"` : value;
+      paramList.push(`${key}: ${displayValue}`);
+    }
+    
+    return `<small style="opacity: 0.7; margin-top: 4px; display: block;">Parameters: ${paramList.join(', ')}</small>`;
+  }
+
+  // Helper function to generate parameter instructions
+  function getParameterInstructions(params) {
+    if (Object.keys(params).length === 0) {
+      return '';
+    }
+    
+    var instructions = [];
+    
+    // Add specific instructions based on parameters
+    if (params.hasOwnProperty('volume')) {
+      instructions.push(`Volume: ${params.volume}`);
+    }
+    if (params.hasOwnProperty('autoplay') && params.autoplay) {
+      instructions.push('Autoplay enabled');
+    }
+    if (params.hasOwnProperty('loop') && params.loop) {
+      instructions.push('Looping enabled');
+    }
+    if (params.hasOwnProperty('speed')) {
+      instructions.push(`Speed: ${params.speed}x`);
+    }
+    
+    return instructions.length > 0 ? ` • ${instructions.join(' • ')}` : '';
+  }
 })();

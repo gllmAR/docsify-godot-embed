@@ -1,10 +1,3 @@
----
-title: "Movement Systems"
-description: "Character movement and navigation techniques"
-icon: "🏃"
-category: "movement"
----
-
 # Movement Techniques
 
 Learn different movement techniques in game development.

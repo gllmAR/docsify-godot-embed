@@ -1,5 +1,7 @@
 # Basic Movement
 
+<!-- start-embed-demo-/gdEmbed/exports/web/?category=movement&scene=basic_movement -->
+
 Learn simple directional movement and fundamental player controls.
 
 ## What You'll Learn
@@ -16,9 +18,6 @@ This demo shows basic movement techniques including:
 - Smooth acceleration and deceleration
 - Movement boundaries and constraints
 - Speed adjustment and control
-
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=movement&scene=basic_movement -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

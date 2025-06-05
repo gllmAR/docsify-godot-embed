@@ -1,10 +1,3 @@
----
-title: "Physics Systems"
-description: "Realistic physics simulation and collision detection"
-icon: "⚽"
-category: "physics"
----
-
 # Physics Simulation
 
 Explore physics-based interactions and simulations with realistic movement, momentum, and collision detection.

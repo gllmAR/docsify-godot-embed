@@ -1,5 +1,7 @@
 # Platformer Movement
 
+<!-- embed-gdEmbed: scenes/movement/platformer_movement/platformer_movement-->
+
 Master jump mechanics and gravity for engaging platform games.
 
 ## What You'll Learn
@@ -17,8 +19,6 @@ This demo shows platformer movement including:
 - Ground state detection
 - Air movement and control
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=movement&scene=platformer_movement -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

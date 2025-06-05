@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfrs8wgdtnvob"]
-
-[ext_resource type="Script" path="res://scenes/tutorial_base.gd" id="1_2k7ua"]
-
-[node name="TutorialBase" type="Node"]
-script = ExtResource("1_2k7ua")

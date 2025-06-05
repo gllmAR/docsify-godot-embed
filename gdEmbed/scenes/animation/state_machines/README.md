@@ -2,6 +2,8 @@
 
 Master complex animation logic with state transitions and conditional playback.
 
+<!-- embed-gdEmbed: scenes/animation/state_machines/state_machines_demo -->
+
 ## What You'll Learn
 
 - Complete state machine implementation
@@ -54,8 +56,6 @@ This advanced state machine demo features:
 - **Transition Tracking**: Previous state history
 - **Timer Visualization**: Countdown displays for all systems
 
-<!-- start-embed-demo-/gdEmbed/exports/web/?category=animation&scene=state_machines -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 

@@ -2,6 +2,8 @@
 
 Master detecting and responding to object collisions and interactions.
 
+<!-- embed-gdEmbed: scenes/physics/collision_detection/collision_detection -->
+
 ## What You'll Learn
 
 - Multiple collision detection methodologies
@@ -63,7 +65,6 @@ This comprehensive collision detection demo features:
 - Analyze collision system performance
 
 <!-- start-embed-demo-/gdEmbed/exports/web/?category=physics&scene=collision_detection -->
-<!-- end-embed-godot -->
 
 ## Key Concepts
 
