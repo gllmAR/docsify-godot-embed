@@ -8,6 +8,18 @@ func _ready():
 	await get_tree().process_frame
 	await get_tree().process_frame
 	
+	print("🔍 Scene Manager starting in %s mode" % ("web" if OS.has_feature("web") else "desktop"))
+	print("🔍 Available categories: " + str(SceneManagerGlobal.available_categories.keys()))
+	
+	# Debug: Print all discovered scenes in web mode
+	if OS.has_feature("web"):
+		for category_key in SceneManagerGlobal.available_categories.keys():
+			var category_info = SceneManagerGlobal.available_categories[category_key]
+			print("📁 Category: " + category_key + " (" + str(category_info.scenes.size()) + " scenes)")
+			for scene_key in category_info.scenes.keys():
+				var scene_info = category_info.scenes[scene_key]
+				print("  🎮 " + scene_key + ": " + scene_info.title + " -> " + scene_info.path)
+	
 	var params = _parse_url_parameters()
 	var category = params.get("category", "")
 	var scene = params.get("scene", "")
@@ -110,9 +122,22 @@ func _create_file_navigator_ui(expanded_category: String = "") -> Control:
 	var sorted_categories = SceneManagerGlobal.available_categories.keys()
 	sorted_categories.sort()
 	
-	for category_key in sorted_categories:
-		var category_info = SceneManagerGlobal.available_categories[category_key]
-		_create_category_section(content, category_key, category_info)
+	# Add debug info if no categories found
+	if sorted_categories.size() == 0:
+		var error_label = Label.new()
+		error_label.text = "No scenes found. Check console for details."
+		error_label.add_theme_color_override("font_color", Color.RED)
+		error_label.add_theme_font_size_override("font_size", 16)
+		error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		content.add_child(error_label)
+		
+		print("❌ No categories discovered in scene manager")
+		print("❌ Running in: %s mode" % ("web" if OS.has_feature("web") else "desktop"))
+		print("❌ Available categories dict: " + str(SceneManagerGlobal.available_categories))
+	else:
+		for category_key in sorted_categories:
+			var category_info = SceneManagerGlobal.available_categories[category_key]
+			_create_category_section(content, category_key, category_info)
 	
 	return main_container
 
@@ -182,8 +207,23 @@ func _on_scene_selected(category: String, scene_key: String):
 func _load_scene(category: String, scene_key: String):
 	print("🎯 Loading scene: " + category + "/" + scene_key)
 	
+	# Check if the scene exists in our discovered categories
+	if not SceneManagerGlobal.available_categories.has(category):
+		print("❌ Category not found: " + category)
+		print("Available categories: " + str(SceneManagerGlobal.available_categories.keys()))
+		_show_file_navigator()
+		return
+	
+	if not SceneManagerGlobal.available_categories[category]["scenes"].has(scene_key):
+		print("❌ Scene not found: " + scene_key + " in category " + category)
+		print("Available scenes: " + str(SceneManagerGlobal.available_categories[category]["scenes"].keys()))
+		_show_file_navigator()
+		return
+	
 	var scene_info = SceneManagerGlobal.available_categories[category]["scenes"][scene_key]
 	var scene_path = scene_info.path
+	
+	print("🔄 Loading scene from: " + scene_path)
 	
 	_clear_loaded_scenes()
 	
@@ -192,8 +232,15 @@ func _load_scene(category: String, scene_key: String):
 		var instance = scene_resource.instantiate()
 		add_child(instance)
 		
+		# Try to fill the viewport if it's a Control node
 		if instance is Control:
 			instance.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		
+		# Pass category information to the scene if it can accept it
+		if instance.has_method("set_category"):
+			instance.set_category(category)
+		elif "category" in instance:
+			instance.category = category
 		
 		print("✅ Loaded scene: " + scene_info.title)
 	else:
@@ -201,9 +248,13 @@ func _load_scene(category: String, scene_key: String):
 		_show_file_navigator()
 
 func _clear_loaded_scenes():
+	# Clear any previously loaded scenes - be more specific about what to remove
 	for child in get_children():
-		if child != selector_ui and child.get_script():
-			child.queue_free()
+		if child != selector_ui:
+			# Only remove nodes that are likely to be loaded scenes
+			if child.get_script() != null or child is Control or child is Node2D or child is Node3D:
+				print("🧹 Removing previous scene: " + str(child.name))
+				child.queue_free()
 
 func _is_valid_scene(category: String, scene: String) -> bool:
 	return SceneManagerGlobal.is_valid_scene(category, scene)

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://blftb6jwf0dkt"]
 
-[ext_resource type="Script" uid="uid://d22u70mlwokm7" path="res://scenes/audio/advance_audio_player/advance_audio_demo.gd" id="1_h5n8m"]
+[ext_resource type="Script" uid="uid://d22u70mlwokm7" path="res://scenes/audio/advance_audioplayer/advance_audio_demo.gd" id="1_h5n8m"]
 
 [node name="AdvanceAudioDemo" type="Control"]
 layout_mode = 3

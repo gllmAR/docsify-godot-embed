@@ -78,8 +78,3 @@ func _on_loop_type_pressed():
 - **Smart boundary checking** to prevent invalid configurations
 - **Real-time constraint validation** during user interaction
 
-## Next Steps
-
-- Try [Basic Audio Player](../basic_audio/) for simpler controls
-- Explore [OGG Vorbis Playback](../ogg_playback/) for compressed audio
-- Learn [Positional Audio](../positional_audio/) for spatial sound effects
