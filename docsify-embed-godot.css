@@ -476,7 +476,7 @@ body.mobile-fullscreen-active {
   }
   
   .demo-header h3 {
-    font-size: 14px !important;
+    font-size: 12px !important;
     padding-right: 100px !important;
     max-height: 38px !important;
     padding-top: 3px !important;
@@ -522,6 +522,50 @@ body.mobile-fullscreen-active {
   }
 }
 
+/* Ultra small screens - very narrow devices */
+@media (max-width: 360px) {
+  .demo-container {
+    margin: 12px 6px;
+    padding: 10px;
+  }
+  
+  .demo-header h3 {
+    font-size: 11px !important;
+    padding-right: 90px !important;
+    max-height: 36px !important;
+    line-height: 1.2 !important;
+  }
+  
+  .demo-controls {
+    gap: 4px !important;
+  }
+  
+  .demo-controls button {
+    min-height: 36px !important;
+    min-width: 36px !important;
+    padding: 8px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Mobile fullscreen adjustments for ultra small screens */
+  .mobile-fullscreen .demo-header h3 {
+    font-size: 12px !important;
+    padding-right: 90px !important;
+    max-height: 32px !important;
+  }
+  
+  .mobile-fullscreen .demo-controls {
+    gap: 4px !important;
+  }
+  
+  .mobile-fullscreen .demo-controls button {
+    padding: 5px 7px !important;
+    font-size: 11px !important;
+    min-height: 30px !important;
+    min-width: 30px !important;
+  }
+}
+
 /* Landscape orientation optimizations */
 @media (max-width: 768px) and (orientation: landscape) {
   .demo-container iframe {
@@ -534,7 +578,7 @@ body.mobile-fullscreen-active {
   }
   
   .demo-header h3 {
-    font-size: 12px !important;
+    font-size: 11px !important;
     padding-right: 90px !important;
     max-height: 32px !important;
     padding-top: 2px !important;
