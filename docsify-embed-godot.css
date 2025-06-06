@@ -231,12 +231,37 @@ body.dark .demo-instructions {
   }
   
   .demo-header {
-    flex-direction: column;
-    align-items: stretch;
+    position: relative !important;
+    display: block !important;
+    margin-bottom: 12px;
+    min-height: 48px !important;
+  }
+  
+  .demo-header h3 {
+    font-size: 16px;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    text-align: left !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    padding-right: 120px !important;
+    max-height: 42px !important;
+    padding-top: 3px !important;
   }
   
   .demo-controls {
-    justify-content: center;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    z-index: 100 !important;
+    height: 44px !important;
+    align-items: center !important;
   }
   
   .demo-container iframe {
@@ -278,7 +303,7 @@ body.dark .demo-instructions {
   box-sizing: border-box !important;
   display: block !important;
   height: auto !important;
-  min-height: 48px !important;
+  min-height: 60px !important;
 }
 
 .mobile-fullscreen .demo-header h3 {
@@ -288,20 +313,26 @@ body.dark .demo-instructions {
   font-weight: 500 !important;
   text-align: left !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
   padding-right: 120px !important;
-  line-height: 36px !important;
+  line-height: 1.3 !important;
+  max-height: 42px !important;
+  padding-top: 3px !important;
 }
 
 .mobile-fullscreen .demo-controls {
   position: absolute !important;
-  top: 12px !important;
+  top: 9px !important;
   right: 16px !important;
   gap: 8px !important;
   display: flex !important;
   flex-wrap: nowrap !important;
   z-index: 10001 !important;
+  height: 42px !important;
+  align-items: center !important;
 }
 
 .mobile-fullscreen .demo-controls button {
@@ -440,8 +471,25 @@ body.mobile-fullscreen-active {
     min-height: 40px;
   }
   
+  .demo-header {
+    min-height: 44px !important;
+  }
+  
   .demo-header h3 {
-    font-size: 14px;
+    font-size: 14px !important;
+    padding-right: 100px !important;
+    max-height: 38px !important;
+    padding-top: 3px !important;
+  }
+  
+  .demo-controls {
+    gap: 6px !important;
+    height: 40px !important;
+  }
+  
+  .demo-controls button {
+    min-height: 40px !important;
+    min-width: 40px !important;
   }
   
   /* Mobile fullscreen adjustments for small screens */
@@ -449,19 +497,21 @@ body.mobile-fullscreen-active {
     padding: 8px 12px !important;
     width: 100vw !important;
     max-width: none !important;
-    min-height: 44px !important;
+    min-height: 52px !important;
   }
   
   .mobile-fullscreen .demo-header h3 {
     font-size: 14px !important;
     padding-right: 100px !important;
-    line-height: 32px !important;
+    max-height: 36px !important;
+    padding-top: 2px !important;
   }
   
   .mobile-fullscreen .demo-controls {
-    top: 8px !important;
+    top: 6px !important;
     right: 12px !important;
     gap: 6px !important;
+    height: 40px !important;
   }
   
   .mobile-fullscreen .demo-controls button {
@@ -479,28 +529,49 @@ body.mobile-fullscreen-active {
     min-height: 250px;
   }
   
-  .mobile-fullscreen iframe {
-    height: 100% !important;
+  .demo-header {
+    min-height: 40px !important;
   }
   
-  /* Optimize header for landscape */
+  .demo-header h3 {
+    font-size: 12px !important;
+    padding-right: 90px !important;
+    max-height: 32px !important;
+    padding-top: 2px !important;
+  }
+  
+  .demo-controls {
+    gap: 4px !important;
+    height: 36px !important;
+  }
+  
+  .demo-controls button {
+    min-height: 36px !important;
+    min-width: 36px !important;
+    padding: 8px 10px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Optimize mobile fullscreen header for landscape */
   .mobile-fullscreen .demo-header {
-    padding: 6px 12px !important;
+    padding: 4px 12px !important;
     width: 100vw !important;
     max-width: none !important;
-    min-height: 40px !important;
+    min-height: 44px !important;
   }
   
   .mobile-fullscreen .demo-header h3 {
     font-size: 12px !important;
     padding-right: 90px !important;
-    line-height: 28px !important;
+    max-height: 28px !important;
+    padding-top: 2px !important;
   }
   
   .mobile-fullscreen .demo-controls {
-    top: 6px !important;
+    top: 4px !important;
     right: 12px !important;
     gap: 4px !important;
+    height: 36px !important;
   }
   
   .mobile-fullscreen .demo-controls button {
