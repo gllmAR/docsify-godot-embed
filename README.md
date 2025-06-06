@@ -26,13 +26,33 @@ Embed the entire project with scene browser:
 <!-- embed-gdEmbed -->
 ```
 
+This creates a full project browser where users can explore all available scenes.
+
 ### Specific Scene Embed
 
 Embed a specific scene:
 
 ```html
-<!-- embed-gdEmbed: scenes/animation/tweening/tweening -->
+<!-- embed-gdEmbed: audio/advance_audioplayer -->
 ```
+
+Available scene paths:
+- `animation/basic_animation` - Basic animation example
+- `animation/state_machines` - Animation state machines
+- `animation/tweening` - Tweening animations
+- `audio/advance_audioplayer` - Advanced audio player
+- `audio/basic_audio` - Basic audio demo
+- `input/gamepad_input` - Gamepad input handling
+- `input/keyboard_input` - Keyboard input demo
+- `input/mouse_input` - Mouse input example
+- `movement/basic_movement` - Basic character movement
+- `movement/platformer_movement` - Platformer movement mechanics
+- `movement/top_down_movement` - Top-down movement
+- `physics/basic_physics` - Basic physics demo
+- `physics/collision_detection` - Collision detection
+- `physics/rigid_bodies` - Rigid body physics
+- `visual_effects/particle_systems` - Particle systems
+- `visual_effects/shader_effects` - Shader effects
 
 ### Dynamic Path Resolution
 
@@ -41,6 +61,7 @@ Use current path for relative scene embedding:
 ```html
 <!-- embed-gdEmbed: {$PATH}/demo_scene -->
 ```
+This uses the current page's path to determine which scene to embed. Useful for documentation that follows the same structure as your scenes.
 
 ## How It Works
 

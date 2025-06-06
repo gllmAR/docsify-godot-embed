@@ -169,7 +169,7 @@
   const processedMarkers = new Set();
 
   function initializeDemoEmbeds() {
-    // Find all embed markers - updated to support both formats
+    // Find all embed markers
     var embedMarkers = document.evaluate(
       '//comment()[contains(., "embed-")]',
       document,
@@ -178,37 +178,13 @@
       null
     );
     
-    console.log('Found', embedMarkers.snapshotLength, 'potential embed markers');
-    
-    // Debug: Log all found comments
-    for (let i = 0; i < embedMarkers.snapshotLength; i++) {
-      var marker = embedMarkers.snapshotItem(i);
-      console.log('Found comment:', marker.textContent.trim());
-    }
-    
     if (embedMarkers.snapshotLength === 0) {
-      console.log('No embed markers found - checking for comments manually...');
-      // Fallback: manually scan for comments
-      var allComments = document.evaluate(
-        '//comment()',
-        document,
-        null,
-        XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-        null
-      );
-      console.log('Total comments in document:', allComments.snapshotLength);
-      for (let i = 0; i < allComments.snapshotLength; i++) {
-        var comment = allComments.snapshotItem(i);
-        console.log('Comment', i + ':', comment.textContent.trim());
-      }
       return;
     }
     
     // Get base URL
     var baseUrl = window.location.href.split('#')[0].replace(/\/index\.html$/, '/');
     if (!baseUrl.endsWith('/')) baseUrl += '/';
-    
-    console.log('Base URL:', baseUrl);
     
     // Process each marker
     for (let i = 0; i < embedMarkers.snapshotLength; i++) {
@@ -218,13 +194,11 @@
 
   function processEmbed(marker, baseUrl) {
     var markerText = marker.textContent.trim();
-    console.log('Processing embed marker:', markerText);
     
     var markerId = markerText + '_' + Date.now();
     
     // Skip if already processed
     if (processedMarkers.has(markerId)) {
-      console.log('Marker already processed, skipping');
       return;
     }
     processedMarkers.add(markerId);
@@ -232,46 +206,36 @@
     // Check if container already exists
     const nextSibling = marker.nextSibling;
     if (nextSibling && nextSibling.classList && nextSibling.classList.contains('demo-container')) {
-      console.log('Container already exists, skipping');
       return;
     }
     
-    // Parse the marker - improved regex to handle both formats:
-    // <!-- embed-gdEmbed: scenes/animation/tweening/tweening --> (specific scene)
-    // <!-- embed-gdEmbed --> (project main scene)
+    // Parse the marker
     var embedMatch = markerText.match(/embed-([a-zA-Z0-9_-]+)(?:\s*:\s*(.+))?/);
     if (!embedMatch) {
       console.warn('Invalid embed format:', markerText);
-      console.warn('Expected formats: "embed-projectName" or "embed-projectName: path"');
       return;
     }
     
-    var projectName = embedMatch[1];  // Extract project name (e.g., "gdEmbed")
-    var embedPath = embedMatch[2];    // Optional scene path
-    
-    console.log('Parsed - Project:', projectName, 'Path:', embedPath || '(none)');
+    var projectName = embedMatch[1];
+    var embedPath = embedMatch[2];
     
     var sceneName, fullScenePath, demoPath;
     
     if (!embedPath) {
       // Simple embed format: <!-- embed-projectName -->
-      // Use project main scene/browser
       sceneName = `${projectName} Project`;
-      fullScenePath = '';  // Empty path triggers main scene browser
+      fullScenePath = '';
       demoPath = `${projectName}/exports/web/`;
-      console.log(`Embedding project: ${projectName} (main scene browser)`);
     } else {
       // Full embed format with specific scene path
       embedPath = embedPath.trim();
       
       // Handle path expansion for {$PATH} substitution
       if (embedPath.startsWith('{$PATH}/')) {
-        // Get current document path from URL hash
-        var currentHash = window.location.hash.substring(1); // Remove #
+        var currentHash = window.location.hash.substring(1);
         var currentPath = '';
         
         if (currentHash) {
-          // Extract directory path from current route
           var pathPattern = new RegExp(`${projectName}\\/(scenes\\/[^\\/]+\\/[^\\/]+)`);
           var pathMatch = currentHash.match(pathPattern);
           if (pathMatch) {
@@ -284,9 +248,7 @@
           return;
         }
         
-        // Replace {$PATH} with the current path
         embedPath = embedPath.replace('{$PATH}', currentPath);
-        console.log(`Path expansion: {$PATH} -> ${currentPath}, final path: ${embedPath}`);
       }
       
       var pathParts = embedPath.split('/');
@@ -296,16 +258,12 @@
         return;
       }
       
-      // Extract path components: scenes/animation/tweening/tweening
-      var category = pathParts[1];        // animation
-      var sceneFolder = pathParts[2];     // tweening  
-      sceneName = pathParts[3];           // tweening (actual scene name)
+      var category = pathParts[1];
+      var sceneFolder = pathParts[2];
+      sceneName = pathParts[3];
       
-      // Pass the full scene path to Godot
-      fullScenePath = `${category}/${sceneFolder}`;
-      demoPath = `${projectName}/exports/web/?scene=${encodeURIComponent(fullScenePath)}`;
-      
-      console.log(`Embedding: ${sceneName} (full path: ${fullScenePath}, project: ${projectName})`);
+      var scenePath = `${category}/${sceneFolder}`;
+      demoPath = `${projectName}/exports/web/?scene=${encodeURIComponent(scenePath)}`;
     }
     
     // Build demo URL
@@ -315,7 +273,6 @@
     var container = document.createElement('div');
     container.className = 'demo-container';
     
-    // Add special class for project embeds
     if (!embedPath) {
       container.classList.add('demo-project-embed');
     }
@@ -324,7 +281,6 @@
     var fullscreenBtnId = `fullscreen-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
     var popoutBtnId = `popout-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
 
-    // Different content for project vs scene embeds
     var headerTitle = embedPath ? 
       `🎮 Interactive Demo: ${sceneName}` : 
       `🎮 ${sceneName}`;

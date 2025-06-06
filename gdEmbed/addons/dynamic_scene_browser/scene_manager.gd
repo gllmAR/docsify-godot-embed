@@ -25,26 +25,36 @@ func load_scene_from_url():
 	# Get scene parameter from URL
 	var js_code = """
 	(function() {
-		var urlParams = new URLSearchParams(window.location.search);
-		var scene = urlParams.get('scene');
-		return scene || '';
-	});
+		try {
+			var urlParams = new URLSearchParams(window.location.search);
+			var scene = urlParams.get('scene');
+			return scene || null;
+		} catch(e) {
+			console.error('Error getting scene parameter:', e);
+			return null;
+		}
+	})();
 	"""
 	
 	var scene_path = JavaScriptBridge.eval(js_code)
 	
-	if scene_path and scene_path != "":
-		print("🔗 Scene path: " + scene_path)
+	# Handle the case where JavaScriptBridge returns null differently than empty string
+	var has_scene_param = scene_path != null and str(scene_path) != "" and str(scene_path) != "null"
+	
+	if has_scene_param:
+		var scene_path_str = str(scene_path)
+		print("🔗 Loading scene: " + scene_path_str)
 		
 		# Try different path formats to find the scene
-		var scene_info = _find_scene_by_path(scene_path)
+		var scene_info = _find_scene_by_path(scene_path_str)
 		
 		if scene_info.size() > 0:
-			print("✅ Loading scene: " + scene_info.name)
-			# For web URLs, still use full scene replacement (no back button)
+			print("✅ Scene found: " + scene_info.name)
+			# For web URLs with scene parameter, use full scene replacement (no back button)
+			# This is for embed context where we want to lock to specific scene
 			get_tree().change_scene_to_file(scene_info.path)
 		else:
-			print("⚠️ Invalid scene path: " + scene_path)
+			print("⚠️ Scene not found: " + scene_path_str + ", showing browser")
 			_show_scene_browser()
 	else:
 		print("📁 No scene specified, showing browser")
@@ -58,42 +68,41 @@ func _find_scene_by_path(path: String) -> Dictionary:
 		print("❌ SceneManagerGlobal not available")
 		return {}
 	
-	print("🔍 Searching for scene with path: '" + path + "'")
+	# Strategy 1: Direct scene key lookup
+	if scene_manager_global.discovered_scenes.has(path):
+		return scene_manager_global.discovered_scenes[path]
 	
-	# Strategy 1: Direct key lookup (animation_basic_animation_basic_animation)
+	# Strategy 2: Direct key lookup with path-to-underscore conversion
 	var direct_key = path.replace("/", "_")
 	if scene_manager_global.discovered_scenes.has(direct_key):
-		print("✅ Found by direct key: " + direct_key)
 		return scene_manager_global.discovered_scenes[direct_key]
 	
-	# Strategy 2: Try with specific patterns that match our manifest structure
+	# Strategy 3: Try with specific patterns that match our manifest structure
 	var path_parts = path.split("/")
 	if path_parts.size() >= 2:
-		var category = path_parts[0]    # e.g., "animation"
-		var folder = path_parts[1]      # e.g., "basic_animation"
+		var category = path_parts[0]    # e.g., "audio"
+		var folder = path_parts[1]      # e.g., "advance_audioplayer"
 		
 		# Our manifest structure uses: category_folder_folder pattern
 		var pattern_keys = [
-			category + "_" + folder + "_" + folder,              # animation_basic_animation_basic_animation
-			category + "_" + folder + "_" + folder + "_demo",    # animation_basic_animation_basic_animation_demo
-			category + "_" + folder + "_demo",                   # animation_basic_animation_demo
-			category + "_" + folder,                             # animation_basic_animation
-			category + "_" + folder + "_" + category,            # animation_basic_animation_animation
+			category + "_" + folder + "_" + folder,              # audio_advance_audioplayer_advance_audioplayer
+			category + "_" + folder + "_" + folder + "_demo",    # audio_advance_audioplayer_advance_audioplayer_demo
+			category + "_" + folder + "_demo",                   # audio_advance_audioplayer_demo
+			category + "_" + folder,                             # audio_advance_audioplayer
+			category + "_" + folder + "_" + category,            # audio_advance_audioplayer_audio
 		]
 		
 		for key in pattern_keys:
 			if scene_manager_global.discovered_scenes.has(key):
-				print("✅ Found scene with pattern key: " + key)
 				return scene_manager_global.discovered_scenes[key]
 	
-	# Strategy 3: Search by directory match from manifest
+	# Strategy 4: Search by directory match from manifest
 	for scene_key in scene_manager_global.discovered_scenes.keys():
 		var scene_info = scene_manager_global.discovered_scenes[scene_key]
 		var scene_directory = scene_info.get("directory", "")
 		
-		# Direct directory match: animation/basic_animation
+		# Direct directory match: audio/advance_audioplayer
 		if scene_directory == path:
-			print("✅ Found scene by directory match: " + scene_key + " (dir: " + scene_directory + ")")
 			return scene_info
 		
 		# Category/subfolder construction
@@ -103,48 +112,27 @@ func _find_scene_by_path(path: String) -> Dictionary:
 		if scene_category != "" and scene_subfolder != "":
 			var constructed_path = scene_category + "/" + scene_subfolder
 			if constructed_path == path:
-				print("✅ Found scene by category/subfolder match: " + scene_key)
 				return scene_info
 	
-	# Strategy 4: Fuzzy matching - look for scenes that contain the path components
+	# Strategy 5: Fuzzy matching - look for scenes that contain the path components
 	if path_parts.size() >= 2:
 		var category = path_parts[0]
 		var folder = path_parts[1]
-		
-		print("🔍 Fuzzy search for category: '" + category + "', folder: '" + folder + "'")
 		
 		for scene_key in scene_manager_global.discovered_scenes.keys():
 			var scene_info = scene_manager_global.discovered_scenes[scene_key]
 			
 			# Check if scene key contains both category and folder
 			if scene_key.contains(category) and scene_key.contains(folder):
-				print("✅ Found scene by fuzzy key match: " + scene_key)
 				return scene_info
 	
-	# Strategy 5: Debug all available scenes and their paths
-	print("❌ No scene found for path: " + path)
-	print("📋 Available scenes and their paths:")
-	for key in scene_manager_global.discovered_scenes.keys():
-		var info = scene_manager_global.discovered_scenes[key]
-		var dir = info.get("directory", "")
-		var category = info.get("category", "")
-		var subfolder = info.get("subfolder", "")
-		var name = info.get("name", "")
-		print("  - " + key + ":")
-		print("    directory: '" + dir + "'")
-		print("    category: '" + category + "', subfolder: '" + subfolder + "'")
-		print("    name: '" + name + "'")
-		print("    Expected path: '" + (category + "/" + subfolder if subfolder != "" else category + "/" + name) + "'")
-	
+	# No scene found
 	return {}
 
 func _show_scene_browser():
-	print("📁 Showing scene browser")
 	_create_scene_browser_ui()
 
 func _create_scene_browser_ui():
-	print("🎨 Using native Godot Tree control for file browser")
-	
 	# Create the main UI container
 	selector_ui = Control.new()
 	selector_ui.name = "SceneBrowserUI"
@@ -160,7 +148,6 @@ func _create_scene_browser_ui():
 	
 	# Get viewport size for proper scaling
 	var viewport_size = get_viewport().get_visible_rect().size
-	print("🎨 Viewport size: " + str(viewport_size))
 	
 	# Create main panel with adaptive sizing
 	var panel = Panel.new()
@@ -171,8 +158,6 @@ func _create_scene_browser_ui():
 	var panel_height = max(600, min(1000, viewport_size.y * 0.9))
 	panel.size = Vector2(panel_width, panel_height)
 	panel.position = (viewport_size - panel.size) / 2
-	
-	print("🎨 Panel size: " + str(panel.size) + " at position: " + str(panel.position))
 	
 	# Panel styling
 	var panel_bg = StyleBoxFlat.new()
@@ -214,10 +199,10 @@ func _create_scene_browser_ui():
 	tree.hide_root = false
 	tree.allow_reselect = true
 	tree.select_mode = Tree.SELECT_SINGLE
-	tree.custom_minimum_size = Vector2(400, 300)  # Minimum size
+	tree.custom_minimum_size = Vector2(400, 300)
 	
 	# Tree styling with responsive font sizes
-	var base_font_size = max(12, min(16, viewport_size.y / 50))  # Scale font with screen height
+	var base_font_size = max(12, min(16, viewport_size.y / 50))
 	tree.add_theme_font_size_override("font_size", int(base_font_size))
 	tree.add_theme_constant_override("item_margin", max(4, int(base_font_size * 0.3)))
 	tree.add_theme_constant_override("inner_item_margin_left", max(16, int(base_font_size * 1.2)))
@@ -233,8 +218,6 @@ func _create_scene_browser_ui():
 	# Add scroll behavior
 	tree.scroll_horizontal_enabled = true
 	tree.scroll_vertical_enabled = true
-	
-	print("🎨 Tree font size: " + str(base_font_size))
 	
 	content.add_child(tree)
 	
@@ -293,16 +276,12 @@ func _create_simple_title_bar() -> Control:
 	
 	title_bar.add_child(button_container)
 	
-	print("🎨 Title font size: " + str(title_font_size) + ", Button font size: " + str(button_font_size))
-	
 	return title_bar
 
 func _build_native_tree(tree: Tree):
 	if not scene_manager_global:
 		print("❌ SceneManagerGlobal not available for tree building")
 		return
-		
-	print("🎨 Building native Tree structure...")
 	
 	# Create root item
 	var root = tree.create_item()
@@ -312,8 +291,6 @@ func _build_native_tree(tree: Tree):
 	
 	# Build from scene tree data
 	_add_tree_folders(scene_manager_global.scene_tree, root, tree)
-	
-	print("✅ Tree structure built")
 
 func _add_tree_folders(tree_data: Dictionary, parent_item: TreeItem, tree: Tree):
 	var sorted_keys = tree_data.keys()
@@ -367,21 +344,15 @@ func _add_tree_scene(scene_key: String, parent_item: TreeItem, tree: Tree):
 		"scene_path": scene_info.path,
 		"title": scene_title
 	})
-	
-	print("✅ Added tree scene: " + scene_title)
 
 func _on_tree_item_selected():
 	if not selector_ui:
-		print("❌ selector_ui is null")
 		return
 	
 	var tree_path = "MainPanel/Content/SceneTree"
 	var tree = selector_ui.get_node_or_null(tree_path)
 	
 	if not tree:
-		print("❌ Tree not found at path: " + tree_path)
-		print("🔍 Available children of selector_ui:")
-		_debug_print_children(selector_ui, 0)
 		return
 	
 	var selected_item = tree.get_selected()
@@ -390,10 +361,8 @@ func _on_tree_item_selected():
 		return
 	
 	var metadata = selected_item.get_metadata(0)
-	if not metadata:
-		return
-	
-	print("🔍 Selected: " + metadata.get("title", "Unknown"))
+	if metadata:
+		print("🔍 Selected: " + metadata.get("title", "Unknown"))
 
 func _on_tree_item_activated():
 	if not selector_ui:
@@ -421,6 +390,7 @@ func _on_tree_item_activated():
 		var scene_path = metadata.get("scene_path", "")
 		if scene_path != "":
 			print("🔗 Loading scene from tree: " + scene_path)
+			# For browser navigation (both web and desktop), use in-browser loading with back button
 			_load_scene_in_browser(scene_path, metadata.get("title", "Scene"))
 
 func _load_scene_in_browser(scene_path: String, scene_title: String):
@@ -460,8 +430,6 @@ func _create_back_button(scene_title: String):
 	if back_button_ui:
 		back_button_ui.queue_free()
 	
-	print("🔙 Creating back button for scene: " + scene_title)
-	
 	# Create overlay container
 	back_button_ui = Control.new()
 	back_button_ui.name = "BackButtonOverlay"
@@ -472,8 +440,8 @@ func _create_back_button(scene_title: String):
 	# Create back button - smaller with ASCII arrow
 	var back_button = Button.new()
 	back_button.text = "<-"
-	back_button.size = Vector2(32, 32)  # Smaller square button
-	back_button.position = Vector2(15, 15)  # Adjusted position
+	back_button.size = Vector2(32, 32)
+	back_button.position = Vector2(15, 15)
 	
 	# Style the button
 	var button_style = StyleBoxFlat.new()
@@ -494,7 +462,7 @@ func _create_back_button(scene_title: String):
 	hover_style.bg_color = Color(0.3, 0.4, 0.6, 0.95)
 	back_button.add_theme_stylebox_override("hover", hover_style)
 	
-	# Text styling - larger font for the arrow
+	# Text styling
 	back_button.add_theme_color_override("font_color", Color.WHITE)
 	back_button.add_theme_font_size_override("font_size", 16)
 	
@@ -503,8 +471,6 @@ func _create_back_button(scene_title: String):
 	back_button.pressed.connect(_on_back_button_pressed)
 	
 	back_button_ui.add_child(back_button)
-	
-	print("✅ Back button created")
 
 func _on_back_button_pressed():
 	print("🔙 Back button pressed, returning to scene browser")
