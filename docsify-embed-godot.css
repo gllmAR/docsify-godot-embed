@@ -259,7 +259,7 @@ body.dark .demo-instructions {
     gap: 8px !important;
     display: flex !important;
     flex-wrap: nowrap !important;
-    z-index: 10 !important;
+    z-index: 1 !important;
     height: 44px !important;
     align-items: center !important;
   }
