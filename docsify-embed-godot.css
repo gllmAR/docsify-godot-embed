@@ -32,22 +32,40 @@
 
 /* Buttons */
 .demo-container button {
-  padding: 8px 12px;
+  padding: 8px 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
   transition: all 0.2s ease;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-fullscreen {
+.btn-fullscreen,
+.btn-true-fullscreen {
   background: #007acc;
   color: white;
 }
 
-.btn-fullscreen:hover {
+.btn-fullscreen:hover,
+.btn-true-fullscreen:hover {
   background: #005a9e;
+  transform: scale(1.05);
+}
+
+.btn-expanded {
+  background: #6366f1;
+  color: white;
+}
+
+.btn-expanded:hover {
+  background: #4f46e5;
+  transform: scale(1.05);
 }
 
 .btn-popout {
@@ -57,6 +75,7 @@
 
 .btn-popout:hover {
   background: #1e7e34;
+  transform: scale(1.05);
 }
 
 /* Iframe Wrapper */
@@ -90,6 +109,76 @@
 .demo-container iframe:fullscreen {
   width: 100vw !important;
   height: 100vh !important;
+}
+
+/* Native Fullscreen Support */
+.demo-container:fullscreen,
+.demo-container:-webkit-full-screen,
+.demo-container:-moz-full-screen {
+  padding: 0;
+  margin: 0;
+  background: #000;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.demo-container:fullscreen .iframe-wrapper,
+.demo-container:-webkit-full-screen .iframe-wrapper,
+.demo-container:-moz-full-screen .iframe-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+  background: #000;
+}
+
+.demo-container:fullscreen iframe,
+.demo-container:-webkit-full-screen iframe,
+.demo-container:-moz-full-screen iframe {
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0;
+}
+
+.demo-container:fullscreen .demo-header,
+.demo-container:-webkit-full-screen .demo-header,
+.demo-container:-moz-full-screen .demo-header {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+  z-index: 10000;
+}
+
+.demo-container:fullscreen .demo-header h3,
+.demo-container:-webkit-full-screen .demo-header h3,
+.demo-container:-moz-full-screen .demo-header h3 {
+  color: white;
+  font-size: 14px;
+  margin: 0;
+}
+
+.demo-container:fullscreen .demo-instructions,
+.demo-container:-webkit-full-screen .demo-instructions,
+.demo-container:-moz-full-screen .demo-instructions {
+  display: none;
+}
+
+/* Iframe Native Fullscreen */
+iframe:fullscreen,
+iframe:-webkit-full-screen,
+iframe:-moz-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  background: #000;
 }
 
 /* Dark Mode */
@@ -227,8 +316,8 @@ body.mobile-fullscreen-active {
 /* Touch-friendly button improvements */
 @media (max-width: 768px) {
   .demo-container button {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 12px;
+    font-size: 18px;
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
@@ -236,6 +325,8 @@ body.mobile-fullscreen-active {
   
   .demo-controls {
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   /* Make iframe more touch-friendly */
@@ -263,8 +354,10 @@ body.mobile-fullscreen-active {
   }
   
   .demo-container button {
-    padding: 10px 12px;
-    font-size: 12px;
+    padding: 10px;
+    font-size: 16px;
+    min-width: 40px;
+    min-height: 40px;
   }
   
   .demo-header h3 {

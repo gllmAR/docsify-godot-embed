@@ -14,21 +14,99 @@
         document.mozCancelFullScreen();
       }
     } else {
-      // Enter fullscreen with mobile fallbacks
+      // Enter fullscreen
       if (isMobileDevice()) {
+        // Mobile: Use custom fullscreen
         handleMobileFullscreen(iframe);
       } else {
-        // Desktop fullscreen
+        // Desktop: Try native fullscreen on iframe first, fallback to container
+        var container = iframe.closest('.demo-container');
+        
+        // Try iframe fullscreen first
+        var fullscreenPromise = null;
         if (iframe.requestFullscreen) {
-          iframe.requestFullscreen().catch(() => handleMobileFullscreen(iframe));
+          fullscreenPromise = iframe.requestFullscreen();
         } else if (iframe.webkitRequestFullscreen) {
-          iframe.webkitRequestFullscreen();
+          fullscreenPromise = iframe.webkitRequestFullscreen();
         } else if (iframe.mozRequestFullScreen) {
-          iframe.mozRequestFullScreen();
+          fullscreenPromise = iframe.mozRequestFullScreen();
+        }
+        
+        // If iframe fullscreen fails, try container fullscreen
+        if (fullscreenPromise) {
+          fullscreenPromise.catch(() => {
+            tryContainerFullscreen(container);
+          });
         } else {
-          handleMobileFullscreen(iframe);
+          tryContainerFullscreen(container);
         }
       }
+    }
+  }
+
+  // Toggle true fullscreen (native browser fullscreen)
+  function toggleTrueFullscreen(iframe) {
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+    } else {
+      // Enter true fullscreen - try iframe first, then container
+      var container = iframe.closest('.demo-container');
+      
+      var fullscreenPromise = null;
+      if (iframe.requestFullscreen) {
+        fullscreenPromise = iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        fullscreenPromise = iframe.webkitRequestFullscreen();
+      } else if (iframe.mozRequestFullScreen) {
+        fullscreenPromise = iframe.mozRequestFullScreen();
+      }
+      
+      // If iframe fullscreen fails, try container fullscreen
+      if (fullscreenPromise) {
+        fullscreenPromise.catch(() => {
+          tryContainerFullscreen(container);
+        });
+      } else {
+        tryContainerFullscreen(container);
+      }
+    }
+  }
+
+  // Toggle expanded view (mobile-style fullscreen)
+  function toggleExpandedView(iframe) {
+    handleMobileFullscreen(iframe);
+  }
+
+  // Legacy fullscreen function - now delegates to appropriate method
+  function toggleFullscreen(iframe) {
+    if (isMobileDevice()) {
+      toggleExpandedView(iframe);
+    } else {
+      toggleTrueFullscreen(iframe);
+    }
+  }
+
+  function tryContainerFullscreen(container) {
+    if (container.requestFullscreen) {
+      container.requestFullscreen().catch(() => {
+        console.warn('Fullscreen not supported, using mobile fallback');
+        handleMobileFullscreen(container.querySelector('iframe'));
+      });
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
+    } else if (container.mozRequestFullScreen) {
+      container.mozRequestFullScreen();
+    } else {
+      // Fallback to mobile-style fullscreen
+      console.warn('Fullscreen not supported, using mobile fallback');
+      handleMobileFullscreen(container.querySelector('iframe'));
     }
   }
 
@@ -87,14 +165,34 @@
     }
   }
 
-  // Update fullscreen button text with mobile support
-  function updateFullscreenButton(button) {
-    var isFullscreen = document.fullscreenElement || 
-                      document.webkitFullscreenElement || 
-                      document.mozFullScreenElement ||
-                      button.closest('.demo-container').classList.contains('mobile-fullscreen');
+  // Update button text for all fullscreen buttons
+  function updateFullscreenButtons(container) {
+    var isNativeFullscreen = document.fullscreenElement || 
+                            document.webkitFullscreenElement || 
+                            document.mozFullScreenElement;
+    var isMobileFullscreen = container && container.classList.contains('mobile-fullscreen');
     
-    button.textContent = isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen';
+    // Update true fullscreen button
+    var trueFullscreenBtn = container.querySelector('.btn-true-fullscreen');
+    if (trueFullscreenBtn) {
+      trueFullscreenBtn.textContent = isNativeFullscreen ? '⛶' : '⛶';
+      trueFullscreenBtn.title = isNativeFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Native)';
+    }
+    
+    // Update expanded view button
+    var expandedBtn = container.querySelector('.btn-expanded');
+    if (expandedBtn) {
+      expandedBtn.textContent = isMobileFullscreen ? '⇱' : '⇱';
+      expandedBtn.title = isMobileFullscreen ? 'Exit Expanded View' : 'Expanded View';
+    }
+    
+    // Update legacy fullscreen button (if exists)
+    var fullscreenBtn = container.querySelector('.btn-fullscreen');
+    if (fullscreenBtn) {
+      var isFullscreen = isNativeFullscreen || isMobileFullscreen;
+      fullscreenBtn.textContent = isFullscreen ? '⛶' : '⛶';
+      fullscreenBtn.title = isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
   }
   
   // Simple demo controls setup with mobile enhancements
@@ -103,17 +201,38 @@
     var fullscreenBtn = document.getElementById(fullscreenBtnId);
     var popoutBtn = document.getElementById(popoutBtnId);
     
-    if (!iframe || !fullscreenBtn || !popoutBtn) return;
+    // Get additional buttons
+    var trueFullscreenBtn = document.getElementById(fullscreenBtnId.replace('fullscreen', 'true-fullscreen'));
+    var expandedBtn = document.getElementById(fullscreenBtnId.replace('fullscreen', 'expanded'));
     
-    // Fullscreen functionality with mobile support
-    fullscreenBtn.addEventListener('click', function() {
-      toggleFullscreen(iframe);
-    });
+    if (!iframe || !popoutBtn) return;
+    
+    var container = iframe.closest('.demo-container');
+    
+    // True fullscreen functionality (desktop native)
+    if (trueFullscreenBtn) {
+      trueFullscreenBtn.addEventListener('click', function() {
+        toggleTrueFullscreen(iframe);
+      });
+    }
+    
+    // Expanded view functionality (mobile-style)
+    if (expandedBtn) {
+      expandedBtn.addEventListener('click', function() {
+        toggleExpandedView(iframe);
+      });
+    }
+    
+    // Legacy fullscreen functionality
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', function() {
+        toggleFullscreen(iframe);
+      });
+    }
     
     // Pop-out functionality with mobile adjustments
     popoutBtn.addEventListener('click', function() {
       if (isMobileDevice()) {
-        // On mobile, open in same tab to avoid popup blockers
         window.open(demoUrl, '_blank');
       } else {
         window.open(demoUrl, `demo-${sceneName}`, 'width=1000,height=800,scrollbars=yes,resizable=yes');
@@ -122,19 +241,18 @@
     
     // Listen for fullscreen changes (all vendors)
     document.addEventListener('fullscreenchange', function() {
-      updateFullscreenButton(fullscreenBtn);
+      updateFullscreenButtons(container);
     });
     document.addEventListener('webkitfullscreenchange', function() {
-      updateFullscreenButton(fullscreenBtn);
+      updateFullscreenButtons(container);
     });
     document.addEventListener('mozfullscreenchange', function() {
-      updateFullscreenButton(fullscreenBtn);
+      updateFullscreenButtons(container);
     });
     
     // Listen for escape key to exit mobile fullscreen
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        var container = iframe.closest('.demo-container');
         if (container && container.classList.contains('mobile-fullscreen')) {
           exitMobileFullscreen(container);
         }
@@ -279,6 +397,8 @@
     
     var iframeId = `demo-iframe-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
     var fullscreenBtnId = `fullscreen-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var trueFullscreenBtnId = `true-fullscreen-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var expandedBtnId = `expanded-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
     var popoutBtnId = `popout-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
 
     var headerTitle = embedPath ? 
@@ -289,12 +409,28 @@
       'Use arrow keys to move • Press R to reset • Interactive demo' :
       'Browse and select scenes • Interactive project explorer';
 
+    // Create control buttons based on device type
+    var controlButtons = '';
+    if (isMobileDevice()) {
+      // Mobile: Show expanded view and pop-out
+      controlButtons = `
+        <button id="${expandedBtnId}" class="btn-expanded" title="Expanded View">⇱</button>
+        <button id="${popoutBtnId}" class="btn-popout" title="Open in New Tab">↗</button>
+      `;
+    } else {
+      // Desktop: Show all three options
+      controlButtons = `
+        <button id="${trueFullscreenBtnId}" class="btn-true-fullscreen" title="Enter Fullscreen (Native)">⛶</button>
+        <button id="${expandedBtnId}" class="btn-expanded" title="Expanded View">⇱</button>
+        <button id="${popoutBtnId}" class="btn-popout" title="Open in New Window">↗</button>
+      `;
+    }
+
     container.innerHTML = `
       <div class="demo-header">
         <h3>${headerTitle}</h3>
         <div class="demo-controls">
-          <button id="${fullscreenBtnId}" class="btn-fullscreen">⛶ Fullscreen</button>
-          <button id="${popoutBtnId}" class="btn-popout">↗ Pop Out</button>
+          ${controlButtons}
         </div>
       </div>
       <div class="iframe-wrapper">
