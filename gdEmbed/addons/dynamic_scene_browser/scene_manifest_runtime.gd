@@ -98,7 +98,9 @@ func _scan_directory_recursive(path: String, relative_path: String, scenes: Dict
 						"title": _generate_title(scene_name),
 						"directory": directory,
 						"category": directory.get_slice("/", 0) if directory != "" else "",
-						"subfolder": directory.get_slice("/", 1) if directory.get_slice_count("/") > 1 else ""
+						"subfolder": directory.get_slice("/", 1) if directory.get_slice_count("/") > 1 else "",
+						"description": _generate_description(scene_name),
+						"tags": _extract_tags(scene_name)
 					}
 					
 					# Add to structure
@@ -127,3 +129,52 @@ func _generate_title(name: String) -> String:
 			title_words.append(word[0].to_upper() + word.substr(1).to_lower())
 	
 	return " ".join(title_words)
+
+func _generate_description(name: String) -> String:
+	"""Generate a description based on scene name patterns"""
+	var words = name.split("_")
+	var description = ""
+	
+	# Common patterns for descriptions
+	if "demo" in words:
+		description = "Interactive demonstration of " + name.replace("_demo", "").replace("_", " ")
+	elif "basic" in words:
+		description = "Basic example showing " + name.replace("basic_", "").replace("_", " ")
+	elif "advanced" in words:
+		description = "Advanced example of " + name.replace("advanced_", "").replace("_", " ")
+	else:
+		description = "Scene demonstrating " + name.replace("_", " ")
+	
+	return description
+
+func _extract_tags(name: String) -> Array:
+	"""Extract tags from scene name for categorization"""
+	var tags = []
+	var words = name.split("_")
+	
+	# Common tag patterns
+	for word in words:
+		match word.to_lower():
+			"basic":
+				tags.append("beginner")
+			"advanced":
+				tags.append("advanced")
+			"demo":
+				tags.append("demo")
+			"animation":
+				tags.append("animation")
+			"input":
+				tags.append("input")
+			"ui":
+				tags.append("ui")
+			"physics":
+				tags.append("physics")
+			"3d":
+				tags.append("3d")
+			"2d":
+				tags.append("2d")
+			_:
+				if word.length() > 3:  # Only include meaningful words
+					tags.append(word.to_lower())
+	
+	return tags

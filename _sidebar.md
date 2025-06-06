@@ -1,3 +1,4 @@
+* [home](/)
 * [gdEmbed Demo project ](/gdEmbed/)
   * [Interactive Godot Demos](/gdEmbed/scenes/)
     * [Animation Systems](/gdEmbed/scenes/animation/)

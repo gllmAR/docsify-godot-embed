@@ -305,6 +305,26 @@ func _debug_print_tree(tree_data: Dictionary, indent_level: int):
 - Manifest generation: <1 second for 100 scenes
 - Export integration: <5% build time overhead
 
+## Performance Optimizations
+
+### Scene Discovery Performance
+- **Caching**: Implement discovery result caching for repeated scans
+- **Incremental Updates**: Track file system changes for partial re-discovery
+- **Parallel Processing**: Multi-threaded scene scanning for large projects
+- **Memory Management**: Lazy loading of scene metadata
+
+### UI Performance
+- **Virtual Scrolling**: For projects with hundreds of scenes
+- **Thumbnail Generation**: Automated scene preview creation
+- **Search Indexing**: Full-text search across scene names and metadata
+- **Keyboard Navigation**: Complete keyboard accessibility
+
+### Web Optimization
+- **Manifest Compression**: Gzip compression for large manifests
+- **Progressive Loading**: Load scene metadata on-demand
+- **Service Worker**: Offline scene browser capability
+- **CDN Integration**: Asset delivery optimization
+
 ## Contributing
 
 ### Development Setup

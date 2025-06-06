@@ -4,9 +4,14 @@ extends Node
 var discovered_scenes: Dictionary = {}
 var scene_tree: Dictionary = {}
 
+# Performance tracking variables
+var _discovery_cache: Dictionary = {}
+var _start_time: float = 0.0
+
 const MANIFEST_PATH = "res://scene_manifest.json"
 
 func _ready():
+	_start_time = Time.get_time_dict_from_system().values().reduce(func(a, b): return a + b)
 	discover_all_scenes()
 	print("🔍 SceneManager discovered %d scenes total" % discovered_scenes.size())
 
@@ -115,6 +120,16 @@ func _discover_scenes_recursive(path: String, relative_path: String = ""):
 		file_name = dir.get_next()
 	
 	dir.list_dir_end()
+	
+	# Add caching mechanism
+	var cache_key = path.hash()
+	if not _discovery_cache.has(cache_key):
+		_discovery_cache[cache_key] = discovered_scenes.duplicate()
+	
+	# Add performance metrics
+	var current_time = Time.get_time_dict_from_system().values().reduce(func(a, b): return a + b)
+	var discovery_time = current_time - _start_time
+	print("🔍 Scene discovery completed in " + str(discovery_time) + " seconds")
 
 func _build_scene_tree():
 	"""Build hierarchical tree structure from discovered scenes"""

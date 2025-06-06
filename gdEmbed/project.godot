@@ -33,6 +33,13 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[dynamic_scene_browser]
+
+base_path="res://scenes/"
+auto_generate_manifests=true
+default_scene=""
+show_browser_on_empty_scene=true
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/dynamic_scene_browser/plugin.cfg")

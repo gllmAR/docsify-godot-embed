@@ -565,4 +565,37 @@ func get_scene_usage_report() -> String:
     return report
 ```
 
-These examples demonstrate the flexibility and power of the Dynamic Scene Browser addon across different use cases and integration scenarios.
+## Performance Monitoring Examples
+
+### Scene Discovery Profiler
+
+```gdscript
+extends Node
+
+class SceneDiscoveryProfiler:
+    var start_time: float
+    var scene_count: int = 0
+    var discovery_stats: Dictionary = {}
+    
+    func start_profiling():
+        start_time = Time.get_time_dict_from_system().values().reduce(func(a, b): return a + b)
+        scene_count = 0
+        discovery_stats.clear()
+    
+    func profile_scene_discovery(path: String):
+        scene_count += 1
+        var current_time = Time.get_time_dict_from_system().values().reduce(func(a, b): return a + b)
+        var category = path.split("/")[0] if "/" in path else "root"
+        
+        if not discovery_stats.has(category):
+            discovery_stats[category] = {"count": 0, "total_time": 0.0}
+        
+        discovery_stats[category].count += 1
+        discovery_stats[category].total_time += (current_time - start_time)
+    
+    func get_performance_report() -> Dictionary:
+        var total_time = Time.get_time_dict_from_system().values().reduce(func(a, b): return a + b) - start_time
+        return {
+            "total_scenes": scene_count,
+            "total_time": total_time,
+            "scenes_per_second": scene_count / total_time if total_time > 0

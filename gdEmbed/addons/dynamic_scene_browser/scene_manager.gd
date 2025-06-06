@@ -163,7 +163,7 @@ func _create_scene_browser_ui():
 	var viewport_size = get_viewport().get_visible_rect().size
 	print("🎨 Viewport size: " + str(viewport_size))
 	
-	# Create main panel with responsive sizing
+	# Create main panel with adaptive sizing
 	var panel = Panel.new()
 	panel.name = "MainPanel"
 	

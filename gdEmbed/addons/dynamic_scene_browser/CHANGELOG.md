@@ -152,3 +152,20 @@ Areas identified for potential future enhancement:
 - [x] Export preset configuration validation
 
 This release represents a stable foundation for dynamic scene management that can be extended and customized for specific project needs.
+
+## [1.1.0] - Planned Future Release
+
+### Planned Features
+- **Scene Tagging System**: Metadata-driven scene categorization
+- **Advanced Search**: Full-text search with filters and sorting
+- **Scene Dependencies**: Automatic dependency tracking and visualization
+- **Preview Generation**: Automated scene thumbnail creation
+- **Performance Analytics**: Built-in profiling and optimization tools
+- **Mobile UI**: Touch-optimized interface for mobile devices
+- **Localization**: Multi-language support for international projects
+
+### Technical Improvements
+- **Virtual Scrolling**: Handle projects with 1000+ scenes efficiently
+- **Incremental Discovery**: File system watching for real-time updates
+- **Memory Optimization**: Reduced memory footprint for large projects
+- **Export Validation**: Pre-export scene integrity checking
