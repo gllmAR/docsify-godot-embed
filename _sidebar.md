@@ -1,5 +1,5 @@
-* [home](/)
 * [gdEmbed Demo project ](/gdEmbed/)
+    * [Dynamic Scene Browser Addon](/gdEmbed/addons/dynamic_scene_browser/)
   * [Interactive Godot Demos](/gdEmbed/scenes/)
     * [Animation Systems](/gdEmbed/scenes/animation/)
       * [Basic Animation](/gdEmbed/scenes/animation/basic_animation/)

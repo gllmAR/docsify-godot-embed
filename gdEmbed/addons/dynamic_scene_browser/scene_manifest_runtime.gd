@@ -4,11 +4,10 @@ extends SceneTree
 # Runtime scene manifest generator - can be used outside the editor
 const MANIFEST_PATH = "res://scene_manifest.json"
 
+# Critical workflow: _init() -> call_deferred() -> generate_and_quit()
 func _init():
 	print("🔍 Initializing scene manifest generator...")
-	
-	# Use call_deferred to ensure proper initialization
-	call_deferred("_generate_and_quit")
+	call_deferred("_generate_and_quit")  # Ensures proper initialization
 
 func _generate_and_quit():
 	print("🔍 Starting manifest generation...")

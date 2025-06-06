@@ -15,20 +15,14 @@ func _ready():
 	discover_all_scenes()
 	print("🔍 SceneManager discovered %d scenes total" % discovered_scenes.size())
 
+# Multi-strategy discovery system
 func discover_all_scenes():
-	discovered_scenes.clear()
-	scene_tree.clear()
-	
-	print("🔍 Starting manifest-based scene discovery")
-	
-	if _load_scene_manifest():
+	if _load_scene_manifest():        # Strategy 1: Manifest-based (web optimized)
 		print("✅ Loaded scenes from manifest")
 	else:
-		print("⚠️ Manifest not found, falling back to runtime discovery")
-		_fallback_discovery()
+		_fallback_discovery()         # Strategy 2: Runtime scanning (desktop)
 	
-	_build_scene_tree()
-	print("🔍 Final scene tree built with %d top-level paths" % scene_tree.size())
+	_build_scene_tree()               # Strategy 3: Hierarchical organization
 
 func _load_scene_manifest() -> bool:
 	"""Load scenes from the generated manifest file"""
@@ -131,16 +125,18 @@ func _discover_scenes_recursive(path: String, relative_path: String = ""):
 	var discovery_time = current_time - _start_time
 	print("🔍 Scene discovery completed in " + str(discovery_time) + " seconds")
 
+# Scene tree building with path analysis
 func _build_scene_tree():
-	"""Build hierarchical tree structure from discovered scenes"""
-	print("🔍 Building scene tree from %d discovered scenes" % discovered_scenes.size())
-	
 	for scene_key in discovered_scenes.keys():
 		var scene_info = discovered_scenes[scene_key]
 		var path_parts = scene_info.relative_path.split("/")
 		
-		print("🔍 Processing scene: " + scene_key + " with path parts: " + str(path_parts))
+		# Handle different nesting levels:
+		# - Root level: direct scenes
+		# - Category level: scenes/category/scene.tscn  
+		# - Nested level: scenes/category/subfolder/scene.tscn
 		
+		# Creates navigable folder structure for UI
 		# Remove .tscn extension from the last part (the filename)
 		if path_parts.size() > 0:
 			path_parts[path_parts.size() - 1] = path_parts[path_parts.size() - 1].replace(".tscn", "")

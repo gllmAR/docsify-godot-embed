@@ -4,25 +4,22 @@ extends Node2D
 var selector_ui: Control
 var is_selector_active = false
 var folder_states: Dictionary = {}  # Track folder expansion states
+var current_scene_instance: Node  # Currently loaded scene instance
+var back_button_ui: Control  # Back button overlay
 
 # Safety check for autoload
 var scene_manager_global: Node
 
 func _ready():
-	# Safely get the autoload
+	# Initialize the scene_manager_global reference
 	scene_manager_global = get_node_or_null("/root/SceneManagerGlobal")
-	
 	if not scene_manager_global:
-		print("❌ SceneManagerGlobal autoload not found - plugin may be disabled")
-		return
-	
-	print("🔍 Scene Manager starting in " + ("web" if OS.has_feature("web") else "desktop") + " mode")
-	print("🔍 Available scenes: " + str(scene_manager_global.discovered_scenes.size()) + " total")
+		print("❌ SceneManagerGlobal autoload not found!")
 	
 	if OS.has_feature("web"):
-		load_scene_from_url()
+		load_scene_from_url()         # Web: URL parameter parsing
 	else:
-		_show_scene_browser()
+		_show_scene_browser()         # Desktop: Full UI browser
 
 func load_scene_from_url():
 	# Get scene parameter from URL
@@ -31,7 +28,7 @@ func load_scene_from_url():
 		var urlParams = new URLSearchParams(window.location.search);
 		var scene = urlParams.get('scene');
 		return scene || '';
-	})();
+	});
 	"""
 	
 	var scene_path = JavaScriptBridge.eval(js_code)
@@ -44,6 +41,7 @@ func load_scene_from_url():
 		
 		if scene_info.size() > 0:
 			print("✅ Loading scene: " + scene_info.name)
+			# For web URLs, still use full scene replacement (no back button)
 			get_tree().change_scene_to_file(scene_info.path)
 		else:
 			print("⚠️ Invalid scene path: " + scene_path)
@@ -52,6 +50,7 @@ func load_scene_from_url():
 		print("📁 No scene specified, showing browser")
 		_show_scene_browser()
 
+# Multi-strategy scene resolution for web platform
 func _find_scene_by_path(path: String) -> Dictionary:
 	"""Try multiple strategies to find a scene by path"""
 	
@@ -422,7 +421,113 @@ func _on_tree_item_activated():
 		var scene_path = metadata.get("scene_path", "")
 		if scene_path != "":
 			print("🔗 Loading scene from tree: " + scene_path)
-			get_tree().change_scene_to_file(scene_path)
+			_load_scene_in_browser(scene_path, metadata.get("title", "Scene"))
+
+func _load_scene_in_browser(scene_path: String, scene_title: String):
+	print("🎮 Loading scene in browser: " + scene_title)
+	
+	# Hide the browser UI
+	if selector_ui:
+		selector_ui.visible = false
+	
+	# Clean up previous scene instance
+	if current_scene_instance:
+		current_scene_instance.queue_free()
+		current_scene_instance = null
+	
+	# Load and instance the new scene
+	var scene_resource = load(scene_path)
+	if not scene_resource:
+		print("❌ Failed to load scene: " + scene_path)
+		_show_scene_browser()
+		return
+	
+	current_scene_instance = scene_resource.instantiate()
+	if not current_scene_instance:
+		print("❌ Failed to instantiate scene: " + scene_path)
+		_show_scene_browser()
+		return
+	
+	# Add scene as child
+	add_child(current_scene_instance)
+	
+	# Create back button overlay
+	_create_back_button(scene_title)
+	
+	print("✅ Scene loaded in browser: " + scene_title)
+
+func _create_back_button(scene_title: String):
+	if back_button_ui:
+		back_button_ui.queue_free()
+	
+	print("🔙 Creating back button for scene: " + scene_title)
+	
+	# Create overlay container
+	back_button_ui = Control.new()
+	back_button_ui.name = "BackButtonOverlay"
+	back_button_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	back_button_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(back_button_ui)
+	
+	# Create back button - smaller with ASCII arrow
+	var back_button = Button.new()
+	back_button.text = "<-"
+	back_button.size = Vector2(32, 32)  # Smaller square button
+	back_button.position = Vector2(15, 15)  # Adjusted position
+	
+	# Style the button
+	var button_style = StyleBoxFlat.new()
+	button_style.bg_color = Color(0.2, 0.3, 0.5, 0.9)
+	button_style.border_width_left = 2
+	button_style.border_width_right = 2
+	button_style.border_width_top = 2
+	button_style.border_width_bottom = 2
+	button_style.border_color = Color(0.4, 0.5, 0.7)
+	button_style.corner_radius_top_left = 4
+	button_style.corner_radius_top_right = 4
+	button_style.corner_radius_bottom_left = 4
+	button_style.corner_radius_bottom_right = 4
+	back_button.add_theme_stylebox_override("normal", button_style)
+	
+	# Hover style
+	var hover_style = button_style.duplicate()
+	hover_style.bg_color = Color(0.3, 0.4, 0.6, 0.95)
+	back_button.add_theme_stylebox_override("hover", hover_style)
+	
+	# Text styling - larger font for the arrow
+	back_button.add_theme_color_override("font_color", Color.WHITE)
+	back_button.add_theme_font_size_override("font_size", 16)
+	
+	# Make button clickable
+	back_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	back_button.pressed.connect(_on_back_button_pressed)
+	
+	back_button_ui.add_child(back_button)
+	
+	print("✅ Back button created")
+
+func _on_back_button_pressed():
+	print("🔙 Back button pressed, returning to scene browser")
+	_return_to_browser()
+
+func _return_to_browser():
+	# Clean up current scene
+	if current_scene_instance:
+		current_scene_instance.queue_free()
+		current_scene_instance = null
+	
+	# Remove back button
+	if back_button_ui:
+		back_button_ui.queue_free()
+		back_button_ui = null
+	
+	# Show browser UI
+	if selector_ui:
+		selector_ui.visible = true
+	else:
+		_show_scene_browser()
+	
+	print("✅ Returned to scene browser")
 
 func _expand_all_folders():
 	if not selector_ui:
@@ -466,11 +571,26 @@ func _show_all_scenes():
 	_expand_all_folders()
 
 func _input(event):
-	if event.is_action_pressed("ui_cancel") and is_selector_active:
-		_hide_scene_browser()
+	if event.is_action_pressed("ui_cancel"):
+		if current_scene_instance:
+			# If scene is loaded, return to browser
+			_return_to_browser()
+		elif is_selector_active:
+			# If browser is active, hide it
+			_hide_scene_browser()
 
 func _hide_scene_browser():
 	if selector_ui:
 		selector_ui.queue_free()
+		selector_ui = null
 		is_selector_active = false
-		folder_states.clear()  # Clear folder states when hiding browser
+		folder_states.clear()
+
+# Clean up when the scene manager is destroyed
+func _exit_tree():
+	if current_scene_instance:
+		current_scene_instance.queue_free()
+	if back_button_ui:
+		back_button_ui.queue_free()
+	if selector_ui:
+		selector_ui.queue_free()
