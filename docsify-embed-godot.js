@@ -417,10 +417,10 @@
         <button id="${popoutBtnId}" class="btn-popout" title="Open in New Tab">↗</button>
       `;
     } else {
-      // Desktop: Show all three options
+      // Desktop: Show all three options in order [expand][fullscreen][pop out]
       controlButtons = `
-        <button id="${trueFullscreenBtnId}" class="btn-true-fullscreen" title="Enter Fullscreen (Native)">⛶</button>
         <button id="${expandedBtnId}" class="btn-expanded" title="Expanded View">⇱</button>
+        <button id="${trueFullscreenBtnId}" class="btn-true-fullscreen" title="Enter Fullscreen (Native)">⛶</button>
         <button id="${popoutBtnId}" class="btn-popout" title="Open in New Window">↗</button>
       `;
     }
