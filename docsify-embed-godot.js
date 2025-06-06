@@ -144,11 +144,8 @@
       }, 100);
     }
     
-    // Update button text
-    var fullscreenBtn = container.querySelector('.btn-fullscreen');
-    if (fullscreenBtn) {
-      fullscreenBtn.textContent = '⛶ Exit Fullscreen';
-    }
+    // Update all buttons
+    updateFullscreenButtons(container);
   }
 
   function exitMobileFullscreen(container) {
@@ -158,11 +155,8 @@
     // Restore scroll
     document.body.style.overflow = '';
     
-    // Update button text
-    var fullscreenBtn = container.querySelector('.btn-fullscreen');
-    if (fullscreenBtn) {
-      fullscreenBtn.textContent = '⛶ Fullscreen';
-    }
+    // Update all buttons
+    updateFullscreenButtons(container);
   }
 
   // Update button text for all fullscreen buttons
@@ -179,11 +173,16 @@
       trueFullscreenBtn.title = isNativeFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Native)';
     }
     
-    // Update expanded view button
+    // Update expanded view button - icon changes based on state
     var expandedBtn = container.querySelector('.btn-expanded');
     if (expandedBtn) {
-      expandedBtn.textContent = isMobileFullscreen ? '⇱' : '⇱';
-      expandedBtn.title = isMobileFullscreen ? 'Exit Expanded View' : 'Expanded View';
+      if (isMobileFullscreen) {
+        expandedBtn.textContent = '⇲';  // Contract/minimize icon
+        expandedBtn.title = 'Exit Expanded View';
+      } else {
+        expandedBtn.textContent = '⇱';  // Expand icon
+        expandedBtn.title = 'Expanded View';
+      }
     }
     
     // Update legacy fullscreen button (if exists)
