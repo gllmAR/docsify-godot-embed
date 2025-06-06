@@ -224,9 +224,10 @@ func _create_scene_browser_ui():
 	# Build the tree structure
 	_build_native_tree(tree)
 	
-	# Connect tree signals
-	tree.item_selected.connect(_on_tree_item_selected)
-	tree.item_activated.connect(_on_tree_item_activated)
+	# Connect tree signals - use item_selected for single click
+	tree.item_selected.connect(_on_tree_item_selected_and_activate)
+	# Remove the double-click handler
+	# tree.item_activated.connect(_on_tree_item_activated)
 	
 	is_selector_active = true
 	print("✅ Responsive Tree browser created")
@@ -345,7 +346,8 @@ func _add_tree_scene(scene_key: String, parent_item: TreeItem, tree: Tree):
 		"title": scene_title
 	})
 
-func _on_tree_item_selected():
+func _on_tree_item_selected_and_activate():
+	"""Handle both selection and activation with single click"""
 	if not selector_ui:
 		return
 	
@@ -353,27 +355,6 @@ func _on_tree_item_selected():
 	var tree = selector_ui.get_node_or_null(tree_path)
 	
 	if not tree:
-		return
-	
-	var selected_item = tree.get_selected()
-	
-	if not selected_item:
-		return
-	
-	var metadata = selected_item.get_metadata(0)
-	if metadata:
-		print("🔍 Selected: " + metadata.get("title", "Unknown"))
-
-func _on_tree_item_activated():
-	if not selector_ui:
-		print("❌ selector_ui is null")
-		return
-	
-	var tree_path = "MainPanel/Content/SceneTree"
-	var tree = selector_ui.get_node_or_null(tree_path)
-	
-	if not tree:
-		print("❌ Tree not found at path: " + tree_path)
 		return
 	
 	var selected_item = tree.get_selected()
@@ -385,7 +366,9 @@ func _on_tree_item_activated():
 	if not metadata:
 		return
 	
-	# Only load scenes, not folders
+	print("🔍 Selected: " + metadata.get("title", "Unknown"))
+	
+	# Only load scenes, not folders - single click activation
 	if metadata.get("type") == "scene":
 		var scene_path = metadata.get("scene_path", "")
 		if scene_path != "":
