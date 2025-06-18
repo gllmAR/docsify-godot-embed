@@ -13,6 +13,8 @@ Learn fundamental animation concepts and keyframes in Godot.
 
 ## Interactive Demo
 
+<!-- embed-{$PATH} -->
+
 This demo shows basic animation techniques including:
 - Moving objects with keyframes
 - Scaling and rotation animations

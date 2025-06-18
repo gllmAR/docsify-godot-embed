@@ -45,6 +45,7 @@ Available scene paths:
 - `input/gamepad_input` - Gamepad input handling
 - `input/keyboard_input` - Keyboard input demo
 - `input/mouse_input` - Mouse input example
+- `midi/comprehensive_midi_demo` - Complete MIDI demo with device selection and sampler
 - `movement/basic_movement` - Basic character movement
 - `movement/platformer_movement` - Platformer movement mechanics
 - `movement/top_down_movement` - Top-down movement

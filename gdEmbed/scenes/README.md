@@ -43,6 +43,9 @@ Realistic physics interactions, collision detection, rigid body dynamics, and co
 ### 🎮 Input Handling
 Comprehensive input support for keyboard, mouse, gamepad, and touch interfaces with customizable control schemes.
 
+### 🎹 MIDI Systems
+Professional MIDI input handling, device management, real-time message processing, and musical interface development with cross-platform support.
+
 ### 🎬 Animation Systems
 Advanced animation techniques including state machines, tweening, inverse kinematics, and procedural animation.
 
@@ -82,6 +85,9 @@ Each demo is designed to be both educational and practical, providing real-world
     * [Gamepad Input](/gdEmbed/scenes/input/gamepad_input/)
     * [Keyboard Input](/gdEmbed/scenes/input/keyboard_input/)
     * [Mouse Input](/gdEmbed/scenes/input/mouse_input/)
+* [MIDI Systems](/gdEmbed/scenes/midi/)
+    * [MIDI Browser Permission Demo](/gdEmbed/scenes/midi/browser_permission/)
+    * [Comprehensive MIDI Demo](/gdEmbed/scenes/midi/comprehensive_midi_demo/)
 * [Movement Techniques](/gdEmbed/scenes/movement/)
     * [Basic Movement](/gdEmbed/scenes/movement/basic_movement/)
     * [Platformer Movement](/gdEmbed/scenes/movement/platformer_movement/)

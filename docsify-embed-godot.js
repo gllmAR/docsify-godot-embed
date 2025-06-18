@@ -285,6 +285,38 @@
   // State management
   const processedMarkers = new Set();
 
+  // Extract current path from window location
+  function getCurrentScenePath() {
+    var currentHash = window.location.hash.substring(1);
+    console.log('🔍 getCurrentScenePath - hash:', currentHash);
+    
+    if (!currentHash) {
+      console.warn('No hash found in URL');
+      return null;
+    }
+    
+    // Remove .md extension if present
+    currentHash = currentHash.replace(/\.md$/, '');
+    
+    // Look for patterns like:
+    // gdEmbed/scenes/category/scene_name/README
+    // scenes/category/scene_name/README  
+    // gdEmbed/scenes/category/scene_name
+    // scenes/category/scene_name
+    var pathMatch = currentHash.match(/(?:gdEmbed\/)?scenes\/([^\/]+)\/([^\/]+)(?:\/(?:README|index)?)?$/);
+    
+    if (pathMatch) {
+      var category = pathMatch[1];
+      var sceneName = pathMatch[2];
+      var scenePath = category + '/' + sceneName;
+      console.log('✅ Extracted scene path:', scenePath);
+      return scenePath;
+    }
+    
+    console.warn('Could not extract scene path from hash:', currentHash);
+    return null;
+  }
+
   function initializeDemoEmbeds() {
     // Find all embed markers
     var embedMarkers = document.evaluate(
@@ -325,11 +357,35 @@
     if (nextSibling && nextSibling.classList && nextSibling.classList.contains('demo-container')) {
       return;
     }
+    console.log('🎮 Processing embed marker:', markerText);
     
-    // Parse the marker
+    // Handle the new {$PATH} syntax: <!-- embed-{$PATH} -->
+    if (markerText === 'embed-{$PATH}') {
+      console.log('🎯 Processing {$PATH} embed');
+      
+      var scenePath = getCurrentScenePath();
+      if (!scenePath) {
+        console.error('❌ Could not determine scene path for {$PATH}');
+        insertErrorMessage(marker, 'Could not determine scene path from current location');
+        return;
+      }
+      
+      var sceneName = scenePath.split('/').pop();
+      var demoPath = `gdEmbed/exports/web/?scene=${encodeURIComponent(scenePath)}`;
+      var fullDemoUrl = baseUrl + demoPath;
+      
+      console.log('✅ {$PATH} resolved to:', scenePath);
+      console.log('🔗 Demo URL:', fullDemoUrl);
+      
+      createEmbedContainer(marker, fullDemoUrl, sceneName, scenePath, true);
+      return;
+    }
+    
+    // Parse the original marker formats
     var embedMatch = markerText.match(/embed-([a-zA-Z0-9_-]+)(?:\s*:\s*(.+))?/);
     if (!embedMatch) {
       console.warn('Invalid embed format:', markerText);
+      insertErrorMessage(marker, `Invalid embed format: ${markerText}`);
       return;
     }
     
@@ -349,23 +405,14 @@
       
       // Handle path expansion for {$PATH} substitution
       if (embedPath.startsWith('{$PATH}/')) {
-        var currentHash = window.location.hash.substring(1);
-        var currentPath = '';
-        
-        if (currentHash) {
-          var pathPattern = new RegExp(`${projectName}\\/(scenes\\/[^\\/]+\\/[^\\/]+)`);
-          var pathMatch = currentHash.match(pathPattern);
-          if (pathMatch) {
-            currentPath = pathMatch[1];
-          }
-        }
-        
-        if (!currentPath) {
+        var currentScenePath = getCurrentScenePath();
+        if (!currentScenePath) {
           console.warn('Could not determine current path for {$PATH} expansion');
+          insertErrorMessage(marker, 'Could not determine current path for {$PATH} expansion');
           return;
         }
         
-        embedPath = embedPath.replace('{$PATH}', currentPath);
+        embedPath = embedPath.replace('{$PATH}', 'scenes/' + currentScenePath);
       }
       
       var pathParts = embedPath.split('/');
@@ -391,6 +438,86 @@
     container.className = 'demo-container';
     
     if (!embedPath) {
+      container.classList.add('demo-project-embed');
+    }
+    
+    var iframeId = `demo-iframe-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var fullscreenBtnId = `fullscreen-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var trueFullscreenBtnId = `true-fullscreen-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var expandedBtnId = `expanded-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+    var popoutBtnId = `popout-btn-${sceneName.replace(/\s+/g, '-')}-${Date.now()}`;
+
+    var headerTitle = embedPath ? 
+      `🎮 Interactive Demo: ${sceneName}` : 
+      `🎮 ${sceneName}`;
+    
+    var instructions = embedPath ?
+      'Use arrow keys to move • Press R to reset • Interactive demo' :
+      'Browse and select scenes • Interactive project explorer';
+
+    // Create control buttons based on device type
+    var controlButtons = '';
+    if (isMobileDevice()) {
+      // Mobile: Show expanded view and pop-out
+      controlButtons = `
+        <button id="${expandedBtnId}" class="btn-expanded" title="Expanded View">⇱</button>
+        <button id="${popoutBtnId}" class="btn-popout" title="Open in New Tab">↗</button>
+      `;
+    } else {
+      // Desktop: Show all three options in order [expand][fullscreen][pop out]
+      controlButtons = `
+        <button id="${expandedBtnId}" class="btn-expanded" title="Expanded View">⇱</button>
+        <button id="${trueFullscreenBtnId}" class="btn-true-fullscreen" title="Enter Fullscreen (Native)">⛶</button>
+        <button id="${popoutBtnId}" class="btn-popout" title="Open in New Window">↗</button>
+      `;
+    }
+
+    container.innerHTML = `
+      <div class="demo-header">
+        <h3>${headerTitle}</h3>
+        <div class="demo-controls">
+          ${controlButtons}
+        </div>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe 
+          id="${iframeId}" 
+          src="${fullDemoUrl}"
+          width="800" 
+          height="600" 
+          frameborder="0"
+          allowfullscreen="true">
+          <p>Your browser does not support iframes. <a href="${fullDemoUrl}" target="_blank">Open demo in new tab</a></p>
+        </iframe>
+      </div>
+      <p class="demo-instructions">${instructions}</p>
+    `;
+    
+    // Insert container after marker
+    marker.parentNode.insertBefore(container, marker.nextSibling);
+    
+    // Setup controls
+    setTimeout(() => {
+      setupDemoControls(iframeId, fullscreenBtnId, popoutBtnId, fullDemoUrl, sceneName);
+    }, 100);
+  }
+
+  // Helper function to insert error messages
+  function insertErrorMessage(marker, message) {
+    var errorDiv = document.createElement('div');
+    errorDiv.className = 'embed-error';
+    errorDiv.style.cssText = 'background: #fee; border: 1px solid #fcc; border-radius: 4px; padding: 12px; margin: 16px 0; color: #c33;';
+    errorDiv.innerHTML = `⚠️ Embed Error: ${message}`;
+    marker.parentNode.insertBefore(errorDiv, marker.nextSibling);
+  }
+
+  // Helper function to create embed container
+  function createEmbedContainer(marker, fullDemoUrl, sceneName, embedPath, isProjectEmbed) {
+    // Create container
+    var container = document.createElement('div');
+    container.className = 'demo-container';
+    
+    if (isProjectEmbed) {
       container.classList.add('demo-project-embed');
     }
     

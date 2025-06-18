@@ -1,5 +1,5 @@
 {
-	"generated_at": "2025-06-06T14:17:21",
+	"generated_at": "2025-06-09T15:54:03",
 	"scenes": {
 		"animation_basic_animation_basic_animation": {
 			"category": "animation",
@@ -126,6 +126,36 @@
 				"input"
 			],
 			"title": "Mouse Input"
+		},
+		"midi_browser_permission_browser_permission_demo": {
+			"category": "midi",
+			"description": "Interactive demonstration of browser permission",
+			"directory": "midi/browser_permission",
+			"name": "browser_permission_demo",
+			"path": "res://scenes/midi/browser_permission/browser_permission_demo.tscn",
+			"relative_path": "midi/browser_permission/browser_permission_demo.tscn",
+			"subfolder": "browser_permission",
+			"tags": [
+				"browser",
+				"permission",
+				"demo"
+			],
+			"title": "Browser Permission Demo"
+		},
+		"midi_comprehensive_midi_demo_comprehensive_midi_demo": {
+			"category": "midi",
+			"description": "Interactive demonstration of comprehensive midi",
+			"directory": "midi/comprehensive_midi_demo",
+			"name": "comprehensive_midi_demo",
+			"path": "res://scenes/midi/comprehensive_midi_demo/comprehensive_midi_demo.tscn",
+			"relative_path": "midi/comprehensive_midi_demo/comprehensive_midi_demo.tscn",
+			"subfolder": "comprehensive_midi_demo",
+			"tags": [
+				"comprehensive",
+				"midi",
+				"demo"
+			],
+			"title": "Comprehensive Midi Demo"
 		},
 		"movement_basic_movement_basic_movement": {
 			"category": "movement",
@@ -324,6 +354,28 @@
 			"path": "input/mouse_input",
 			"scenes": [
 				"input_mouse_input_mouse_input"
+			],
+			"type": "folder"
+		},
+		"midi": {
+			"children": [],
+			"path": "midi",
+			"scenes": [],
+			"type": "folder"
+		},
+		"midi/browser_permission": {
+			"children": [],
+			"path": "midi/browser_permission",
+			"scenes": [
+				"midi_browser_permission_browser_permission_demo"
+			],
+			"type": "folder"
+		},
+		"midi/comprehensive_midi_demo": {
+			"children": [],
+			"path": "midi/comprehensive_midi_demo",
+			"scenes": [
+				"midi_comprehensive_midi_demo_comprehensive_midi_demo"
 			],
 			"type": "folder"
 		},
