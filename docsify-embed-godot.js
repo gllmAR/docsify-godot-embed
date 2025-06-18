@@ -418,14 +418,23 @@
       } 
       // Strategy 2: Individual project structure (like godot-demo-projects)
       else {
-        // For individual projects, look for local exports/web/ directory
-        demoPath = `exports/web/`;
+        // For individual projects, construct path to the current project's exports
+        // Remove leading slash and trailing slash/README
+        var cleanHash = currentHash.replace(/^\//, '').replace(/\/(README)?$/, '');
+        demoPath = `${cleanHash}/exports/web/`;
       }
       
       var fullDemoUrl = baseUrl + demoPath;
       
       console.log('✅ {$PATH} resolved to:', scenePath);
       console.log('🔗 Demo URL:', fullDemoUrl);
+      console.log('🔗 Full demo path construction:', {
+        baseUrl: baseUrl,
+        currentHash: currentHash,
+        cleanHash: currentHash.replace(/^\//, '').replace(/\/(README)?$/, ''),
+        demoPath: demoPath,
+        fullDemoUrl: fullDemoUrl
+      });
       
       createEmbedContainer(marker, fullDemoUrl, sceneName, scenePath, true);
       return;
