@@ -298,18 +298,54 @@
     // Remove .md extension if present
     currentHash = currentHash.replace(/\.md$/, '');
     
-    // Look for patterns like:
+    // Remove leading slash if present
+    if (currentHash.startsWith('/')) {
+      currentHash = currentHash.substring(1);
+    }
+    
+    // Remove trailing slash if present
+    if (currentHash.endsWith('/')) {
+      currentHash = currentHash.substring(0, currentHash.length - 1);
+    }
+    
+    // Strategy 1: Look for original docsify-godot-embed patterns like:
     // gdEmbed/scenes/category/scene_name/README
     // scenes/category/scene_name/README  
     // gdEmbed/scenes/category/scene_name
     // scenes/category/scene_name
-    var pathMatch = currentHash.match(/(?:gdEmbed\/)?scenes\/([^\/]+)\/([^\/]+)(?:\/(?:README|index)?)?$/);
+    var originalPathMatch = currentHash.match(/(?:gdEmbed\/)?scenes\/([^\/]+)\/([^\/]+)(?:\/(?:README|index)?)?$/);
     
-    if (pathMatch) {
-      var category = pathMatch[1];
-      var sceneName = pathMatch[2];
+    if (originalPathMatch) {
+      var category = originalPathMatch[1];
+      var sceneName = originalPathMatch[2];
       var scenePath = category + '/' + sceneName;
-      console.log('✅ Extracted scene path:', scenePath);
+      console.log('✅ Extracted original format scene path:', scenePath);
+      return scenePath;
+    }
+    
+    // Strategy 2: Look for general project structures like:
+    // godot-demo-projects/2d/bullet_shower
+    // godot-examples/category/project_name
+    // any-repo/category/project_name
+    var generalPathMatch = currentHash.match(/([^\/]+)\/([^\/]+)\/([^\/]+)(?:\/(?:README|index)?)?$/);
+    
+    if (generalPathMatch) {
+      var repo = generalPathMatch[1];
+      var category = generalPathMatch[2];
+      var projectName = generalPathMatch[3];
+      
+      // For general structures, we'll use category/project_name as the scene path
+      var scenePath = category + '/' + projectName;
+      console.log('✅ Extracted general format scene path:', scenePath);
+      return scenePath;
+    }
+    
+    // Strategy 3: Fallback for simpler structures - use the last two path segments
+    var pathSegments = currentHash.split('/').filter(segment => segment && segment !== 'README' && segment !== 'index');
+    
+    if (pathSegments.length >= 2) {
+      var scenePath = pathSegments.slice(-2).join('/');
+      console.log('✅ Extracted fallback scene path:', scenePath);
       return scenePath;
     }
     
@@ -371,7 +407,21 @@
       }
       
       var sceneName = scenePath.split('/').pop();
-      var demoPath = `gdEmbed/exports/web/?scene=${encodeURIComponent(scenePath)}`;
+      
+      // Determine the demo path based on repository structure
+      var currentHash = window.location.hash.substring(1);
+      var demoPath;
+      
+      // Strategy 1: Original docsify-godot-embed structure
+      if (currentHash.includes('gdEmbed/scenes/') || currentHash.includes('/scenes/')) {
+        demoPath = `gdEmbed/exports/web/?scene=${encodeURIComponent(scenePath)}`;
+      } 
+      // Strategy 2: Individual project structure (like godot-demo-projects)
+      else {
+        // For individual projects, look for local exports/web/ directory
+        demoPath = `exports/web/`;
+      }
+      
       var fullDemoUrl = baseUrl + demoPath;
       
       console.log('✅ {$PATH} resolved to:', scenePath);
