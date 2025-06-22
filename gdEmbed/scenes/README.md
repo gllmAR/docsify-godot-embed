@@ -88,6 +88,8 @@ Each demo is designed to be both educational and practical, providing real-world
 * [MIDI Systems](/gdEmbed/scenes/midi/)
     * [MIDI Browser Permission Demo](/gdEmbed/scenes/midi/browser_permission/)
     * [Comprehensive MIDI Demo](/gdEmbed/scenes/midi/comprehensive_midi_demo/)
+    * [Adaptive MIDI Piano](/gdEmbed/scenes/midi/piano_adaptive/)
+    * [MIDI Piano](/gdEmbed/scenes/midi/piano/)
 * [Movement Techniques](/gdEmbed/scenes/movement/)
     * [Basic Movement](/gdEmbed/scenes/movement/basic_movement/)
     * [Platformer Movement](/gdEmbed/scenes/movement/platformer_movement/)

@@ -1,10 +1,45 @@
 # docsify-godot-embed
 
-A Docsify plugin to embed Godot projects and scenes in iframes with interactive controls.
+A comprehensive Docsify plugin to embed Godot projects and scenes in iframes with interactive controls, responsive design, and cross-platform compatibility.
 
 <!-- embed-gdEmbed -->
 
+## Quick Start
 
+### Installation
+
+1. **Include the plugin in your Docsify HTML:**
+
+```html
+<!-- CSS for styling -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gllmAR/docsify-godot-embed@main/docsify-embed-godot.css">
+
+<!-- JavaScript plugin -->
+<script src="https://cdn.jsdelivr.net/gh/gllmAR/docsify-godot-embed@main/docsify-embed-godot.js"></script>
+```
+
+2. **Add embed markers to your Markdown:**
+
+```markdown
+<!-- For project browser -->
+<!-- embed-gdEmbed -->
+
+<!-- For specific scenes -->
+<!-- embed-gdEmbed: audio/advance_audioplayer -->
+
+<!-- For path-based embedding -->
+<!-- embed-{$PATH} -->
+```
+
+3. **Ensure your Godot project structure follows the convention:**
+
+```
+projectName/
+├── exports/web/          # Web export files
+└── scenes/              # Scene organization
+    ├── category/
+    └── scene_name/
+```
 
 ## Features
 
@@ -12,9 +47,35 @@ A Docsify plugin to embed Godot projects and scenes in iframes with interactive 
 - 🎯 **Scene-Specific Embedding**: Embed specific scenes directly
 - 🔄 **Dynamic Path Resolution**: Support for path variables and current directory resolution
 - 📱 **Responsive Design**: Adaptive UI that works on desktop and mobile
-- ⛶ **Fullscreen Support**: Full-screen viewing with controls
-- ↗️ **Pop-out Windows**: Open demos in separate windows
+- ⛶ **Fullscreen Support**: Multiple fullscreen modes for different devices
+- ↗️ **Pop-out Windows**: Open demos in separate windows or tabs
 - 🌐 **Cross-Origin Ready**: Proper headers for iframe embedding
+- 📱 **Mobile Optimized**: Touch gestures and mobile-specific controls
+
+## Embed Formats
+
+### 1. Project Browser Embed
+Embeds the entire project with interactive scene selection:
+
+```html
+<!-- embed-gdEmbed -->
+```
+
+### 2. Specific Scene Embed
+Embeds a particular scene directly:
+
+```html
+<!-- embed-gdEmbed: audio/advance_audioplayer -->
+```
+
+### 3. Path-Based Embed
+Uses current page path to determine scene:
+
+```html
+<!-- embed-{$PATH} -->
+```
+
+This automatically resolves to the appropriate scene based on the current documentation path.
 
 ## Usage
 
@@ -100,59 +161,68 @@ This plugin works seamlessly with the Dynamic Scene Browser addon:
 - **Hierarchical Navigation**: Organized scene browsing when no specific scene is requested
 - **Web Export Integration**: Automatic manifest generation during builds
 
-## Examples
+## Advanced Configuration
 
-### Documentation Page
+### Custom Base Paths
 
-```markdown
-# Animation Examples
-
-Learn about Godot animations with these interactive demos:
-
-## Project Overview
-<!-- embed-gdEmbed -->
-
-## Basic Animation
-<!-- embed-gdEmbed: scenes/animation/basic_animation/basic_animation -->
-
-## Advanced Tweening
-<!-- embed-gdEmbed: scenes/animation/tweening/tweening -->
+```javascript
+// In your Docsify configuration
+window.$docsify = {
+  // ...existing config...
+  
+  // Custom embed settings (optional)
+  embedGodot: {
+    basePath: 'custom/path/to/exports/',
+    defaultProject: 'myProject',
+    mobileOptimizations: true
+  }
+};
 ```
 
-### Context-Aware Embedding
+### Multiple Projects
 
-```markdown
-# Current Section Demo
+Support for multiple Godot projects in one documentation site:
 
-This demo shows the concepts from this section:
-
-<!-- embed-gdEmbed: {$PATH}/section_demo -->
-```
-
-## Styling
-
-The plugin includes responsive CSS that adapts to different screen sizes:
-
-- **Desktop**: Full-sized demos with controls
-- **Tablet**: Optimized dimensions for touch interfaces  
-- **Mobile**: Compact view with accessible controls
-- **Dark Mode**: Automatic dark theme support
-
-## Configuration
-
-The plugin works out-of-the-box but can be customized via the Godot project settings:
-
-```gdscript
-# Project Settings
-dynamic_scene_browser/base_path = "res://scenes/"
-dynamic_scene_browser/auto_generate_manifests = true
-dynamic_scene_browser/show_browser_on_empty_scene = true
+```html
+<!-- Different projects -->
+<!-- embed-project1 -->
+<!-- embed-project2: scenes/demo/example -->
 ```
 
 ## Browser Compatibility
 
-- Modern browsers with iframe support
-- JavaScript enabled for interactive controls
-- WebAssembly support for Godot web exports
-- Cross-origin iframe embedding capabilities
+| Feature | Chrome | Firefox | Edge | Safari | Mobile |
+|---------|--------|---------|------|--------|---------|
+| Basic Embed | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Fullscreen | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Pop-out | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Touch Controls | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+## Examples Repository
+
+The `gdEmbed` folder contains a complete example project with:
+
+- **17+ Interactive Demos**: Animation, Audio, Physics, Input, MIDI, Movement, Visual Effects
+- **Professional UI**: Consistent styling and responsive design
+- **Educational Content**: Step-by-step tutorials and code examples
+- **Best Practices**: Real-world implementation patterns
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Test with the example project
+4. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📖 [Documentation](https://gllmar.github.io/docsify-godot-embed/)
+- 🐛 [Issue Tracker](https://github.com/gllmAR/docsify-godot-embed/issues)
+- 💬 [Discussions](https://github.com/gllmAR/docsify-godot-embed/discussions)
 

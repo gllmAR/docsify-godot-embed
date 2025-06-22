@@ -1,0 +1,57 @@
+{
+  "name": "docsify-godot-embed",
+  "version": "1.0.0",
+  "description": "A comprehensive Docsify plugin to embed Godot projects and scenes with interactive controls",
+  "main": "docsify-embed-godot.js",
+  "style": "docsify-embed-godot.css",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "serve": "npx serve .",
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "echo \"No linting configured\" && exit 0",
+    "build": "echo \"No build process needed for this plugin\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gllmAR/docsify-godot-embed.git"
+  },
+  "keywords": [
+    "docsify",
+    "godot",
+    "embed",
+    "iframe",
+    "plugin",
+    "documentation",
+    "interactive",
+    "game-development",
+    "web-export",
+    "responsive"
+  ],
+  "author": "gllmAR",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gllmAR/docsify-godot-embed/issues"
+  },
+  "homepage": "https://gllmar.github.io/docsify-godot-embed/",
+  "files": [
+    "docsify-embed-godot.js",
+    "docsify-embed-godot.css",
+    "README.md",
+    "CHANGELOG.md",
+    "docs/"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "peerDependencies": {
+    "docsify": "^4.0.0"
+  }
+}

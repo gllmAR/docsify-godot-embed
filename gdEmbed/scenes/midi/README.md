@@ -5,6 +5,8 @@ Explore comprehensive MIDI input handling, device management, and musical interf
 <!-- start-replace-subnav -->
 * [MIDI Browser Permission Demo](/gdEmbed/scenes/midi/browser_permission/)
 * [Comprehensive MIDI Demo](/gdEmbed/scenes/midi/comprehensive_midi_demo/)
+* [Adaptive MIDI Piano](/gdEmbed/scenes/midi/piano_adaptive/)
+* [MIDI Piano](/gdEmbed/scenes/midi/piano/)
 <!-- end-replace-subnav -->
 
 ## Overview
@@ -57,36 +59,36 @@ var devices = OS.get_connected_midi_inputs()
 
 # Handle MIDI events
 func _input(event):
-    if event is InputEventMIDI:
-        handle_midi_message(event)
+	if event is InputEventMIDI:
+		handle_midi_message(event)
 ```
 
 ### Message Processing
 ```gdscript
 func handle_midi_message(midi_event: InputEventMIDI):
-    match midi_event.message:
-        MIDI_MESSAGE_NOTE_ON:
-            play_note(midi_event.pitch, midi_event.velocity)
-        MIDI_MESSAGE_NOTE_OFF:
-            stop_note(midi_event.pitch)
-        MIDI_MESSAGE_CONTROL_CHANGE:
-            handle_controller(midi_event.controller_number, midi_event.controller_value)
+	match midi_event.message:
+		MIDI_MESSAGE_NOTE_ON:
+			play_note(midi_event.pitch, midi_event.velocity)
+		MIDI_MESSAGE_NOTE_OFF:
+			stop_note(midi_event.pitch)
+		MIDI_MESSAGE_CONTROL_CHANGE:
+			handle_controller(midi_event.controller_number, midi_event.controller_value)
 ```
 
 ### ADSR Envelope Implementation
 ```gdscript
 func apply_adsr_envelope(audio_player: AudioStreamPlayer, velocity: float):
-    var envelope_tween = create_tween()
-    
-    # Attack phase
-    envelope_tween.tween_method(
-        set_volume, 0.0, velocity, attack_time
-    )
-    
-    # Decay to sustain
-    envelope_tween.tween_method(
-        set_volume, velocity, velocity * sustain_level, decay_time
-    ).set_delay(attack_time)
+	var envelope_tween = create_tween()
+	
+	# Attack phase
+	envelope_tween.tween_method(
+		set_volume, 0.0, velocity, attack_time
+	)
+	
+	# Decay to sustain
+	envelope_tween.tween_method(
+		set_volume, velocity, velocity * sustain_level, decay_time
+	).set_delay(attack_time)
 ```
 
 ## Platform Support

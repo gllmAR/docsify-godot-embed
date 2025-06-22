@@ -1,4 +1,4 @@
-extends Node2D
+extends Control
 
 # Scene manager that uses the SceneManagerGlobal autoload data
 var selector_ui: Control
@@ -6,6 +6,7 @@ var is_selector_active = false
 var folder_states: Dictionary = {}  # Track folder expansion states
 var current_scene_instance: Node  # Currently loaded scene instance
 var back_button_ui: Control  # Back button overlay
+var scene_container: Control  # Control container for loaded scenes
 
 # Safety check for autoload
 var scene_manager_global: Node
@@ -16,10 +17,22 @@ func _ready():
 	if not scene_manager_global:
 		print("❌ SceneManagerGlobal autoload not found!")
 	
+	# Create scene container for proper Control hierarchy
+	_create_scene_container()
+	
 	if OS.has_feature("web"):
 		load_scene_from_url()         # Web: URL parameter parsing
 	else:
 		_show_scene_browser()         # Desktop: Full UI browser
+
+func _create_scene_container():
+	"""Create a Control container that fills the viewport for loaded scenes"""
+	scene_container = Control.new()
+	scene_container.name = "SceneContainer" 
+	scene_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scene_container.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Don't block input to child scenes
+	add_child(scene_container)
+	print("🎮 Scene container created with size: %dx%d" % [scene_container.size.x, scene_container.size.y])
 
 func load_scene_from_url():
 	# Get scene parameter from URL
@@ -401,8 +414,8 @@ func _load_scene_in_browser(scene_path: String, scene_title: String):
 		_show_scene_browser()
 		return
 	
-	# Add scene as child
-	add_child(current_scene_instance)
+	# Add scene to the proper container
+	scene_container.add_child(current_scene_instance)
 	
 	# Create back button overlay
 	_create_back_button(scene_title)

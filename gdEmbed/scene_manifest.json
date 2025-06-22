@@ -1,5 +1,5 @@
 {
-	"generated_at": "2025-06-09T15:54:03",
+	"generated_at": "2025-06-22T12:57:49",
 	"scenes": {
 		"animation_basic_animation_basic_animation": {
 			"category": "animation",
@@ -156,6 +156,90 @@
 				"demo"
 			],
 			"title": "Comprehensive Midi Demo"
+		},
+		"midi_piano_adaptive_piano": {
+			"category": "midi",
+			"description": "Scene demonstrating piano",
+			"directory": "midi/piano_adaptive",
+			"name": "piano",
+			"path": "res://scenes/midi/piano_adaptive/piano.tscn",
+			"relative_path": "midi/piano_adaptive/piano.tscn",
+			"subfolder": "piano_adaptive",
+			"tags": [
+				"piano"
+			],
+			"title": "Piano"
+		},
+		"midi_piano_adaptive_piano_keys_black_piano_key_adaptive": {
+			"category": "midi",
+			"description": "Scene demonstrating black piano key adaptive",
+			"directory": "midi/piano_adaptive/piano_keys",
+			"name": "black_piano_key_adaptive",
+			"path": "res://scenes/midi/piano_adaptive/piano_keys/black_piano_key_adaptive.tscn",
+			"relative_path": "midi/piano_adaptive/piano_keys/black_piano_key_adaptive.tscn",
+			"subfolder": "piano_adaptive",
+			"tags": [
+				"black",
+				"piano",
+				"adaptive"
+			],
+			"title": "Black Piano Key Adaptive"
+		},
+		"midi_piano_adaptive_piano_keys_white_piano_key_adaptive": {
+			"category": "midi",
+			"description": "Scene demonstrating white piano key adaptive",
+			"directory": "midi/piano_adaptive/piano_keys",
+			"name": "white_piano_key_adaptive",
+			"path": "res://scenes/midi/piano_adaptive/piano_keys/white_piano_key_adaptive.tscn",
+			"relative_path": "midi/piano_adaptive/piano_keys/white_piano_key_adaptive.tscn",
+			"subfolder": "piano_adaptive",
+			"tags": [
+				"white",
+				"piano",
+				"adaptive"
+			],
+			"title": "White Piano Key Adaptive"
+		},
+		"midi_piano_piano": {
+			"category": "midi",
+			"description": "Scene demonstrating piano",
+			"directory": "midi/piano",
+			"name": "piano",
+			"path": "res://scenes/midi/piano/piano.tscn",
+			"relative_path": "midi/piano/piano.tscn",
+			"subfolder": "piano",
+			"tags": [
+				"piano"
+			],
+			"title": "Piano"
+		},
+		"midi_piano_piano_keys_black_piano_key": {
+			"category": "midi",
+			"description": "Scene demonstrating black piano key",
+			"directory": "midi/piano/piano_keys",
+			"name": "black_piano_key",
+			"path": "res://scenes/midi/piano/piano_keys/black_piano_key.tscn",
+			"relative_path": "midi/piano/piano_keys/black_piano_key.tscn",
+			"subfolder": "piano",
+			"tags": [
+				"black",
+				"piano"
+			],
+			"title": "Black Piano Key"
+		},
+		"midi_piano_piano_keys_white_piano_key": {
+			"category": "midi",
+			"description": "Scene demonstrating white piano key",
+			"directory": "midi/piano/piano_keys",
+			"name": "white_piano_key",
+			"path": "res://scenes/midi/piano/piano_keys/white_piano_key.tscn",
+			"relative_path": "midi/piano/piano_keys/white_piano_key.tscn",
+			"subfolder": "piano",
+			"tags": [
+				"white",
+				"piano"
+			],
+			"title": "White Piano Key"
 		},
 		"movement_basic_movement_basic_movement": {
 			"category": "movement",
@@ -377,6 +461,52 @@
 			"scenes": [
 				"midi_comprehensive_midi_demo_comprehensive_midi_demo"
 			],
+			"type": "folder"
+		},
+		"midi/piano": {
+			"children": [],
+			"path": "midi/piano",
+			"scenes": [
+				"midi_piano_piano"
+			],
+			"type": "folder"
+		},
+		"midi/piano/piano_keys": {
+			"children": [],
+			"path": "midi/piano/piano_keys",
+			"scenes": [
+				"midi_piano_piano_keys_white_piano_key",
+				"midi_piano_piano_keys_black_piano_key"
+			],
+			"type": "folder"
+		},
+		"midi/piano/screenshots": {
+			"children": [],
+			"path": "midi/piano/screenshots",
+			"scenes": [],
+			"type": "folder"
+		},
+		"midi/piano_adaptive": {
+			"children": [],
+			"path": "midi/piano_adaptive",
+			"scenes": [
+				"midi_piano_adaptive_piano"
+			],
+			"type": "folder"
+		},
+		"midi/piano_adaptive/piano_keys": {
+			"children": [],
+			"path": "midi/piano_adaptive/piano_keys",
+			"scenes": [
+				"midi_piano_adaptive_piano_keys_white_piano_key_adaptive",
+				"midi_piano_adaptive_piano_keys_black_piano_key_adaptive"
+			],
+			"type": "folder"
+		},
+		"midi/piano_adaptive/screenshots": {
+			"children": [],
+			"path": "midi/piano_adaptive/screenshots",
+			"scenes": [],
 			"type": "folder"
 		},
 		"movement": {
